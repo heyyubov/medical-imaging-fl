@@ -1,0 +1,118 @@
+{
+  "experiment": "fedavg_non_iid_smoke",
+  "method": "fedavg",
+  "num_clients": 3,
+  "clinic_names": [
+    "Sunrise Medical Center",
+    "Riverside Community Hospital",
+    "MetroCare Clinic"
+  ],
+  "clinic_summary_csv": "results/metrics/fedavg_non_iid_smoke_clinic_summary.csv",
+  "clinic_distribution_plot": "results/plots/fedavg_non_iid_smoke_clinic_distribution.png",
+  "rounds": 1,
+  "elapsed_seconds": 8.64622099999906,
+  "best_auc": 0.6145833333333333,
+  "best_checkpoint": "results/checkpoints/fedavg_non_iid_smoke_best.pt",
+  "history": {
+    "losses_distributed": [
+      [
+        1,
+        0.704129226067487
+      ]
+    ],
+    "metrics_distributed": {
+      "sensitivity": [
+        [
+          1,
+          0.9215686274505818
+        ]
+      ],
+      "specificity": [
+        [
+          1,
+          0.23529411764694116
+        ]
+      ],
+      "auc": [
+        [
+          1,
+          0.3333333333333333
+        ]
+      ],
+      "f1": [
+        [
+          1,
+          0.7068627450980393
+        ]
+      ],
+      "accuracy": [
+        [
+          1,
+          0.5882352941176471
+        ]
+      ]
+    },
+    "losses_centralized": [
+      [
+        0,
+        0.6772436499595642
+      ],
+      [
+        1,
+        0.6852110266685486
+      ]
+    ],
+    "metrics_centralized": {
+      "auc": [
+        [
+          0,
+          0.6145833333333333
+        ],
+        [
+          1,
+          0.46875
+        ]
+      ],
+      "f1": [
+        [
+          0,
+          0.75
+        ],
+        [
+          1,
+          0.6206896551724138
+        ]
+      ],
+      "sensitivity": [
+        [
+          0,
+          0.9999999999999166
+        ],
+        [
+          1,
+          0.7499999999999375
+        ]
+      ],
+      "specificity": [
+        [
+          0,
+          0.0
+        ],
+        [
+          1,
+          0.0
+        ]
+      ],
+      "accuracy": [
+        [
+          0,
+          0.6
+        ],
+        [
+          1,
+          0.45
+        ]
+      ]
+    }
+  }
+}

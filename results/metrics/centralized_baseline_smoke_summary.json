@@ -1,0 +1,16 @@
+{
+  "experiment": "centralized_baseline_smoke",
+  "method": "centralized",
+  "epochs": 1,
+  "elapsed_seconds": 0.4671243749326095,
+  "best_auc": 0.45,
+  "best_checkpoint": "results/checkpoints/centralized_baseline_smoke_best.pt",
+  "test_loss": 0.6979865729808807,
+  "test_metrics": {
+    "auc": 0.4666666666666667,
+    "f1": 0.0,
+    "sensitivity": 0.0,
+    "specificity": 0.9999999999999,
+    "accuracy": 0.625
+  }
+}
