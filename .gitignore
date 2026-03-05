@@ -1,0 +1,30 @@
+__pycache__/
+*.py[cod]
+*.so
+*.dylib
+*.egg-info/
+.venv/
+venv/
+.env
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.DS_Store
+
+# Data artifacts
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Outputs
+results/metrics/*
+results/plots/*
+results/checkpoints/*
+!results/metrics/.gitkeep
+!results/plots/.gitkeep
+!results/checkpoints/.gitkeep
+
+# Experiment trackers
+mlruns/
+wandb/

@@ -1,0 +1,34 @@
+experiment_name: fedavg_non_iid
+seed: 42
+method: fedavg
+
+# Data
+use_fake_data: false
+data_dir: data/processed/chest_xray
+image_size: 224
+train_size: 900
+val_size: 200
+test_size: 200
+partition_strategy: noniid
+partition_alpha: 0.5
+
+# Federated
+num_clients: 3
+rounds: 3
+local_epochs: 1
+batch_size: 16
+num_workers: 0
+lr: 0.001
+weight_decay: 0.0001
+fraction_fit: 1.0
+fraction_evaluate: 1.0
+client_val_fraction: 0.2
+prox_mu: 0.0
+
+# Model
+model_name: resnet18
+num_classes: 2
+device: cpu
+
+# Output
+output_root: results
