@@ -1,9 +1,11 @@
 # Federated Learning for Medical Imaging - Technical Report
 
-Generated: 2026-03-05 00:49:38
+Generated: 2026-03-05 03:10:33
 
 ## 1. Problem
 We evaluate whether chest X-ray classification can be trained in a privacy-preserving setup where data remains local at each clinic.
+
+Project story: **3 clinics train one shared model while raw patient images never leave each clinic**.
 
 ## 2. Method
 - Baselines: Centralized, FedAvg, FedProx
@@ -21,20 +23,30 @@ We evaluate whether chest X-ray classification can be trained in a privacy-prese
 ### 4.1 Main Comparison
 | method | selection | auc | f1 | sensitivity | specificity | accuracy | elapsed_seconds |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| centralized | test | 0.8668310322156476 | 0.7807807807807807 | 0.9999999999999972 | 0.0641025641025638 | 0.6490384615384616 | 583.0690511249995 |
-| fedavg_non_iid | best_auc_round_3 | 0.9022846811308348 | 0.7975460122699386 | 0.9999999999999972 | 0.1538461538461532 | 0.6826923076923077 | 921.264948958 |
-| fedprox_non_iid | best_auc_round_2 | 0.7905489809335963 | 0.7692307692307693 | 0.9999999999999972 | 0.0 | 0.625 | 942.9678088330002 |
+| centralized | test | 0.8668310322156476 | 0.7807807807807807 | 0.9999999999999972 | 0.0641025641025638 | 0.6490384615384616 | 581.5041702500021 |
+| fedavg_non_iid | best_auc_round_3 | 0.9081908831908831 | 0.7707509881422925 | 0.9999999999999972 | 0.0085470085470085 | 0.6282051282051282 | 915.7220920830003 |
+| fedprox_non_iid | best_auc_round_3 | 0.9020710059171596 | 0.7738095238095238 | 0.9999999999999972 | 0.0256410256410255 | 0.6346153846153846 | 915.6711903750002 |
 
-### 4.2 Centralized Test Snapshot
+### 4.2 Three-Clinic Data Setup
+| clinic_id | clinic_name | num_samples | normal_count | pneumonia_count | pneumonia_ratio |
+| --- | --- | --- | --- | --- | --- |
+| 0 | Sunrise Medical Center | 3798 | 1054 | 2744 | 0.7224855186940495 |
+| 1 | Riverside Community Hospital | 960 | 173 | 787 | 0.8197916666666667 |
+| 2 | MetroCare Clinic | 458 | 114 | 344 | 0.7510917030567685 |
+
+### 4.3 Centralized Test Snapshot
 - Test AUC: 0.8668
 - Test F1: 0.7808
 - Test Sensitivity: 1.0000
 - Test Specificity: 0.0641
 - Test Accuracy: 0.6490
 
-### 4.3 Plots
+### 4.4 Plots
 - `results/plots/centralized_baseline_auc_by_epoch.png`
+- `results/plots/fedavg_non_iid_clinic_distribution.png`
+- `results/plots/fedavg_non_iid_smoke_clinic_distribution.png`
 - `results/plots/fedavg_non_iid_auc_by_round.png`
+- `results/plots/fedavg_non_iid_smoke_auc_by_round.png`
 - `results/plots/fedprox_non_iid_auc_by_round.png`
 
 ## 5. Optional FedProx Sweep
@@ -57,4 +69,5 @@ bash scripts/run_centralized.sh
 bash scripts/run_fedavg.sh
 bash scripts/run_fedprox.sh
 bash scripts/run_compare.sh
+bash scripts/run_report.sh
 ```

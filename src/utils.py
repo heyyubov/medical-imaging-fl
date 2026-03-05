@@ -99,6 +99,33 @@ def plot_metric(
     plt.close()
 
 
+def plot_clinic_distribution(
+    clinic_df: pd.DataFrame,
+    path: str | os.PathLike[str],
+    title: str = "Clinic Data Distribution",
+) -> None:
+    ensure_dir(Path(path).parent)
+    if clinic_df.empty:
+        return
+
+    x = np.arange(len(clinic_df))
+    normal = clinic_df["normal_count"].values
+    pneumonia = clinic_df["pneumonia_count"].values
+    labels = clinic_df["clinic_name"].tolist()
+
+    plt.figure(figsize=(9, 5))
+    plt.bar(x, normal, label="NORMAL")
+    plt.bar(x, pneumonia, bottom=normal, label="PNEUMONIA")
+    plt.xticks(x, labels, rotation=20, ha="right")
+    plt.ylabel("Number of Samples")
+    plt.title(title)
+    plt.legend()
+    plt.grid(axis="y", alpha=0.25)
+    plt.tight_layout()
+    plt.savefig(path)
+    plt.close()
+
+
 def get_model_parameters(model: torch.nn.Module) -> List[np.ndarray]:
     return [val.detach().cpu().numpy() for _, val in model.state_dict().items()]
 

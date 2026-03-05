@@ -7,6 +7,11 @@ This project compares:
 - Federated training (FedAvg)
 - Federated training (FedProx)
 
+Default clinic setup (3 virtual hospitals):
+- Sunrise Medical Center
+- Riverside Community Hospital
+- MetroCare Clinic
+
 ## Product Outcome
 
 - End-to-end runnable pipeline
@@ -106,6 +111,8 @@ bash scripts/run_fedprox_sweep.sh
 - Metrics: `results/metrics/*.csv`, `results/metrics/*.json`
 - Plots: `results/plots/*.png`
 - Checkpoints: `results/checkpoints/*.pt`
+- Clinic split summary: `results/metrics/*_clinic_summary.csv`
+- Clinic distribution plot: `results/plots/*_clinic_distribution.png`
 - Final comparison: `results/metrics/comparison_table.csv`
 - Report: `REPORT.md`
 

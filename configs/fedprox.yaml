@@ -14,6 +14,10 @@ partition_alpha: 0.5
 
 # Federated
 num_clients: 3
+clinic_names:
+  - Sunrise Medical Center
+  - Riverside Community Hospital
+  - MetroCare Clinic
 rounds: 3
 local_epochs: 1
 batch_size: 16

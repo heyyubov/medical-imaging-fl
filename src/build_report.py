@@ -53,6 +53,37 @@ def _sweep_markdown(metrics_dir: Path) -> str:
     return _df_to_markdown(df)
 
 
+def _clinic_markdown(metrics_dir: Path) -> str:
+    clinic_candidates = [
+        metrics_dir / "fedavg_non_iid_clinic_summary.csv",
+        metrics_dir / "fedprox_non_iid_clinic_summary.csv",
+        metrics_dir / "fedavg_non_iid_smoke_clinic_summary.csv",
+        metrics_dir / "fedprox_non_iid_smoke_clinic_summary.csv",
+    ]
+    for path in clinic_candidates:
+        if path.exists():
+            df = pd.read_csv(path)
+            return _df_to_markdown(df)
+    return "Clinic summary not found. Run `bash scripts/run_fedavg.sh`."
+
+
+def _plot_lines(project_root: Path) -> str:
+    plot_candidates = [
+        "results/plots/centralized_baseline_auc_by_epoch.png",
+        "results/plots/fedavg_non_iid_clinic_distribution.png",
+        "results/plots/fedavg_non_iid_smoke_clinic_distribution.png",
+        "results/plots/fedavg_non_iid_auc_by_round.png",
+        "results/plots/fedavg_non_iid_smoke_auc_by_round.png",
+        "results/plots/fedprox_non_iid_auc_by_round.png",
+        "results/plots/fedprox_non_iid_smoke_auc_by_round.png",
+    ]
+    lines = []
+    for rel in plot_candidates:
+        if (project_root / rel).exists():
+            lines.append(f"- `{rel}`")
+    return "\n".join(lines) if lines else "- No plots found yet."
+
+
 def _df_to_markdown(df: pd.DataFrame) -> str:
     if df.empty:
         return "_No rows_"
@@ -86,6 +117,8 @@ Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 ## 1. Problem
 We evaluate whether chest X-ray classification can be trained in a privacy-preserving setup where data remains local at each clinic.
 
+Project story: **3 clinics train one shared model while raw patient images never leave each clinic**.
+
 ## 2. Method
 - Baselines: Centralized, FedAvg, FedProx
 - Federated setting: 3 virtual clinics with non-IID data partitions
@@ -102,17 +135,18 @@ We evaluate whether chest X-ray classification can be trained in a privacy-prese
 ### 4.1 Main Comparison
 {_comparison_markdown(metrics_dir)}
 
-### 4.2 Centralized Test Snapshot
+### 4.2 Three-Clinic Data Setup
+{_clinic_markdown(metrics_dir)}
+
+### 4.3 Centralized Test Snapshot
 - Test AUC: {_fmt(c_summary.get("test_metrics", {}).get("auc"))}
 - Test F1: {_fmt(c_summary.get("test_metrics", {}).get("f1"))}
 - Test Sensitivity: {_fmt(c_summary.get("test_metrics", {}).get("sensitivity"))}
 - Test Specificity: {_fmt(c_summary.get("test_metrics", {}).get("specificity"))}
 - Test Accuracy: {_fmt(c_summary.get("test_metrics", {}).get("accuracy"))}
 
-### 4.3 Plots
-- `results/plots/centralized_baseline_auc_by_epoch.png`
-- `results/plots/fedavg_non_iid_auc_by_round.png`
-- `results/plots/fedprox_non_iid_auc_by_round.png`
+### 4.4 Plots
+{_plot_lines(project_root)}
 
 ## 5. Optional FedProx Sweep
 {_sweep_markdown(metrics_dir)}
@@ -134,6 +168,7 @@ bash scripts/run_centralized.sh
 bash scripts/run_fedavg.sh
 bash scripts/run_fedprox.sh
 bash scripts/run_compare.sh
+bash scripts/run_report.sh
 ```
 """
     return report

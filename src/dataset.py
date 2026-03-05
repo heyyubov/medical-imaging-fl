@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Dict, List, Sequence, Tuple
 
 import numpy as np
+import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset
 from torchvision import datasets, transforms
@@ -166,6 +167,39 @@ def _partition_file_name(
     return f"noniid_a{partition_alpha}_n{num_samples}_{num_clients}clients_seed{seed}.json"
 
 
+def get_clinic_names(cfg: Dict, num_clients: int) -> List[str]:
+    names = cfg.get("clinic_names")
+    if isinstance(names, list) and len(names) == num_clients:
+        return [str(x) for x in names]
+    return [f"Clinic_{i + 1}" for i in range(num_clients)]
+
+
+def build_clinic_summary(
+    partitions: Dict[str, List[int]],
+    labels: Sequence[int],
+    clinic_names: Sequence[str],
+) -> pd.DataFrame:
+    labels_arr = np.array(labels)
+    rows: List[Dict] = []
+    for cid in sorted(partitions.keys(), key=int):
+        idx = partitions[cid]
+        subset = labels_arr[idx]
+        total = int(len(subset))
+        class0 = int((subset == 0).sum())
+        class1 = int((subset == 1).sum())
+        rows.append(
+            {
+                "clinic_id": int(cid),
+                "clinic_name": str(clinic_names[int(cid)]),
+                "num_samples": total,
+                "normal_count": class0,
+                "pneumonia_count": class1,
+                "pneumonia_ratio": float(class1 / total) if total > 0 else float("nan"),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
 def create_or_load_partitions(labels: Sequence[int], cfg: Dict) -> Dict[str, List[int]]:
     num_clients = int(cfg["num_clients"])
     partition_strategy = cfg.get("partition_strategy", "noniid").lower()
@@ -229,11 +263,12 @@ def prepare_partitions_from_config(config_path: str) -> None:
         cfg["num_clients"] = 3
 
     partitions = create_or_load_partitions(labels=labels, cfg=cfg)
-    stats = {cid: len(indices) for cid, indices in partitions.items()}
+    clinic_names = get_clinic_names(cfg, int(cfg["num_clients"]))
+    clinic_df = build_clinic_summary(partitions=partitions, labels=labels, clinic_names=clinic_names)
 
     print(f"Prepared partitions for {len(partitions)} clients")
     print(f"Total samples: {len(train_ds)}")
-    print(f"Per-client samples: {stats}")
+    print(f"Per-client samples: {dict(zip(clinic_df['clinic_name'], clinic_df['num_samples']))}")
 
 
 def parse_args() -> argparse.Namespace:

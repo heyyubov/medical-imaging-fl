@@ -11,12 +11,26 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, Subset
 
-from .dataset import create_or_load_partitions, load_datasets, split_client_train_val
+from .dataset import (
+    build_clinic_summary,
+    create_or_load_partitions,
+    get_clinic_names,
+    load_datasets,
+    split_client_train_val,
+)
 from .evaluate import evaluate_model
 from .fl_client import FedMedClient
 from .model import build_model
 from .strategies import build_strategy
-from .utils import make_output_paths, plot_metric, save_dataframe, save_json, set_model_parameters, set_seed
+from .utils import (
+    make_output_paths,
+    plot_clinic_distribution,
+    plot_metric,
+    save_dataframe,
+    save_json,
+    set_model_parameters,
+    set_seed,
+)
 from .utils import load_yaml as load_cfg
 
 
@@ -36,6 +50,8 @@ def main() -> None:
 
     train_ds, _, test_ds, train_labels = load_datasets(cfg)
     partitions = create_or_load_partitions(labels=train_labels, cfg=cfg)
+    clinic_names = get_clinic_names(cfg, int(cfg["num_clients"]))
+    clinic_df = build_clinic_summary(partitions=partitions, labels=train_labels, clinic_names=clinic_names)
 
     device = torch.device(cfg.get("device", "cpu"))
     criterion = nn.CrossEntropyLoss()
@@ -50,6 +66,16 @@ def main() -> None:
     round_metrics: List[Dict[str, float]] = []
     best_auc = -1.0
     best_ckpt = paths.checkpoints_dir / f"{exp_name}_best.pt"
+    clinic_csv = paths.metrics_dir / f"{exp_name}_clinic_summary.csv"
+    clinic_plot = paths.plots_dir / f"{exp_name}_clinic_distribution.png"
+    save_dataframe(clinic_df, clinic_csv)
+    plot_clinic_distribution(clinic_df, clinic_plot, title=f"{exp_name}: Data Split Across Clinics")
+    print("\n[CLINICS]")
+    for row in clinic_df.itertuples(index=False):
+        print(
+            f"  - {row.clinic_name}: n={row.num_samples}, "
+            f"NORMAL={row.normal_count}, PNEUMONIA={row.pneumonia_count}"
+        )
 
     def client_fn(cid: str):
         cid_key = str(cid)
@@ -116,6 +142,9 @@ def main() -> None:
         "experiment": exp_name,
         "method": cfg.get("method", "fedavg"),
         "num_clients": num_clients,
+        "clinic_names": clinic_names,
+        "clinic_summary_csv": str(clinic_csv),
+        "clinic_distribution_plot": str(clinic_plot),
         "rounds": rounds,
         "elapsed_seconds": elapsed,
         "best_auc": float(best_auc),
