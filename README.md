@@ -1,84 +1,55 @@
 # Federated Learning for Medical Imaging
 
-Minimal working skeleton for a research project comparing:
+Three virtual clinics train a shared chest X-ray model while raw patient images never leave each clinic.
+
+This project compares:
 - Centralized training
 - Federated training (FedAvg)
 - Federated training (FedProx)
 
-Task: binary classification of chest X-ray images (e.g., Pneumonia vs Normal).
+## Product Outcome
 
-## 1. Repository Structure
+- End-to-end runnable pipeline
+- Reproducible configs and scripts
+- Saved metrics/plots/checkpoints
+- Final comparison table (`centralized vs fedavg vs fedprox`)
+- Auto-generated technical report
+
+## Repository Structure
 
 ```
 .
 ├── configs/
-│   ├── centralized.yaml
-│   ├── fedavg.yaml
-│   └── fedprox.yaml
 ├── data/
-│   ├── raw/
-│   ├── processed/
-│   └── splits/
 ├── results/
-│   ├── checkpoints/
-│   ├── metrics/
-│   └── plots/
 ├── scripts/
 │   ├── prepare_data.sh
+│   ├── run_all.sh
 │   ├── run_centralized.sh
 │   ├── run_fedavg.sh
-│   └── run_fedprox.sh
+│   ├── run_fedprox.sh
+│   ├── run_fedprox_sweep.sh
+│   ├── run_compare.sh
+│   └── run_report.sh
 ├── src/
+│   ├── build_report.py
+│   ├── compare_results.py
 │   ├── dataset.py
 │   ├── evaluate.py
+│   ├── fedprox_sweep.py
 │   ├── fl_client.py
 │   ├── fl_server.py
 │   ├── model.py
 │   ├── strategies.py
 │   ├── train_centralized.py
 │   └── utils.py
-├── Dockerfile
 ├── REPORT.md
 └── requirements.txt
 ```
 
-## 2. Quick Start
+## Dataset Layout
 
-### 2.1 Create environment
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-### 2.2 Run data preparation (partition generation)
-
-```bash
-bash scripts/prepare_data.sh
-```
-
-### 2.3 Run centralized baseline
-
-```bash
-bash scripts/run_centralized.sh
-```
-
-### 2.4 Run federated baseline (FedAvg)
-
-```bash
-bash scripts/run_fedavg.sh
-```
-
-### 2.5 Run federated baseline (FedProx)
-
-```bash
-bash scripts/run_fedprox.sh
-```
-
-## 3. Data Layout for Real Chest X-ray Dataset
-
-Set `use_fake_data: false` in YAML configs and place data in:
+Use chest X-ray data in this format:
 
 ```
 data/processed/chest_xray/
@@ -93,44 +64,61 @@ data/processed/chest_xray/
     └── PNEUMONIA/
 ```
 
-The skeleton uses `torchvision.datasets.ImageFolder` for this layout.
+Set in configs:
+- `use_fake_data: false`
+- `data_dir: data/processed/chest_xray`
 
-## 4. Reproducibility
+## Quick Start
 
-- Fixed random seed via config (`seed`)
-- All major hyperparameters configurable in YAML
-- Artifacts saved into:
-  - `results/checkpoints/`
-  - `results/metrics/`
-  - `results/plots/`
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
 
-## 5. Configurable Parameters
+## Run Experiments
 
-Key parameters in `configs/*.yaml`:
+### Full product run
 
-- `num_clients`
-- `rounds`
-- `local_epochs`
-- `batch_size`
-- `lr`
-- `partition_strategy` (`iid` or `noniid`)
-- `partition_alpha` (Dirichlet concentration for non-IID)
-- `prox_mu` (for FedProx)
+```bash
+bash scripts/run_all.sh
+```
 
-## 6. What This Skeleton Already Covers
+### Step-by-step run
 
-- Centralized training pipeline (train/val/test)
-- Federated simulation pipeline with Flower
-- FedAvg server aggregation
-- FedProx client-side proximal regularization
-- Metrics: AUC, F1, sensitivity, specificity, accuracy
-- Round/epoch metrics logging (CSV/JSON)
-- Basic AUC plots
+```bash
+bash scripts/prepare_data.sh
+bash scripts/run_centralized.sh
+bash scripts/run_fedavg.sh
+bash scripts/run_fedprox.sh
+bash scripts/run_compare.sh
+bash scripts/run_report.sh
+```
 
-## 7. Next Steps (toward full MVP)
+### Optional FedProx mu sweep
 
-1. Plug in real dataset and validate class balance.
-2. Add result table aggregator (`centralized` vs `fedavg` vs `fedprox`).
-3. Add communication-cost tracking (bytes transferred per round).
-4. Add optional privacy extension (DP-SGD noise/clipping).
-5. Integrate experiment tracking (MLflow or W&B).
+```bash
+bash scripts/run_fedprox_sweep.sh
+```
+
+## Outputs
+
+- Metrics: `results/metrics/*.csv`, `results/metrics/*.json`
+- Plots: `results/plots/*.png`
+- Checkpoints: `results/checkpoints/*.pt`
+- Final comparison: `results/metrics/comparison_table.csv`
+- Report: `REPORT.md`
+
+## Tracked Metrics
+
+- AUC
+- F1
+- Sensitivity
+- Specificity
+- Accuracy
+- Training time / communication rounds
+
+## Notes
+
+- Split files are generated with dataset-size-aware names to avoid smoke/full mismatch.
+- Scripts set local matplotlib cache (`.cache/`) for stable runs on macOS sandboxed environments.

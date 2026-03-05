@@ -129,31 +129,71 @@ def ensure_non_empty_partitions(partitions: Dict[str, List[int]]) -> Dict[str, L
     return partitions
 
 
+def _is_valid_partition_layout(
+    partitions: Dict[str, List[int]],
+    num_clients: int,
+    num_samples: int,
+) -> bool:
+    """Check that partition indices are complete and in range for current dataset."""
+    expected_client_ids = {str(i) for i in range(num_clients)}
+    if set(partitions.keys()) != expected_client_ids:
+        return False
+
+    flat: List[int] = []
+    for idx in partitions.values():
+        flat.extend(idx)
+
+    if len(flat) != num_samples:
+        return False
+    if len(set(flat)) != num_samples:
+        return False
+    if min(flat, default=0) < 0:
+        return False
+    if max(flat, default=-1) >= num_samples:
+        return False
+    return True
+
+
+def _partition_file_name(
+    partition_strategy: str,
+    num_clients: int,
+    seed: int,
+    num_samples: int,
+    partition_alpha: float,
+) -> str:
+    if partition_strategy == "iid":
+        return f"iid_n{num_samples}_{num_clients}clients_seed{seed}.json"
+    return f"noniid_a{partition_alpha}_n{num_samples}_{num_clients}clients_seed{seed}.json"
+
+
 def create_or_load_partitions(labels: Sequence[int], cfg: Dict) -> Dict[str, List[int]]:
     num_clients = int(cfg["num_clients"])
     partition_strategy = cfg.get("partition_strategy", "noniid").lower()
     partition_alpha = float(cfg.get("partition_alpha", 0.5))
     seed = int(cfg.get("seed", 42))
+    num_samples = len(labels)
 
     split_dir = Path("data/splits")
     split_dir.mkdir(parents=True, exist_ok=True)
 
-    if partition_strategy == "iid":
-        name = f"iid_{num_clients}clients_seed{seed}.json"
-    else:
-        name = f"noniid_a{partition_alpha}_{num_clients}clients_seed{seed}.json"
-
-    split_path = split_dir / name
+    split_path = split_dir / _partition_file_name(
+        partition_strategy=partition_strategy,
+        num_clients=num_clients,
+        seed=seed,
+        num_samples=num_samples,
+        partition_alpha=partition_alpha,
+    )
 
     if split_path.exists():
         with open(split_path, "r", encoding="utf-8") as f:
             partitions = ensure_non_empty_partitions(json.load(f))
-        with open(split_path, "w", encoding="utf-8") as f:
-            json.dump(partitions, f, indent=2)
-        return partitions
+        if _is_valid_partition_layout(partitions, num_clients=num_clients, num_samples=num_samples):
+            with open(split_path, "w", encoding="utf-8") as f:
+                json.dump(partitions, f, indent=2)
+            return partitions
 
     if partition_strategy == "iid":
-        partitions = split_iid(num_samples=len(labels), num_clients=num_clients, seed=seed)
+        partitions = split_iid(num_samples=num_samples, num_clients=num_clients, seed=seed)
     elif partition_strategy == "noniid":
         partitions = split_non_iid(labels=labels, num_clients=num_clients, alpha=partition_alpha, seed=seed)
     else:

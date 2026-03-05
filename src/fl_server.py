@@ -52,22 +52,23 @@ def main() -> None:
     best_ckpt = paths.checkpoints_dir / f"{exp_name}_best.pt"
 
     def client_fn(cid: str):
-        indices = partitions[cid]
+        cid_key = str(cid)
+        indices = partitions[cid_key]
         train_idx, val_idx = split_client_train_val(
             indices,
             val_fraction=float(cfg.get("client_val_fraction", 0.2)),
-            seed=int(cfg.get("seed", 42)) + int(cid),
+            seed=int(cfg.get("seed", 42)) + int(cid_key),
         )
 
         client_train = Subset(train_ds, train_idx)
         client_val = Subset(train_ds, val_idx)
 
         return FedMedClient(
-            cid=cid,
+            cid=cid_key,
             cfg=cfg,
             train_dataset=client_train,
             val_dataset=client_val,
-        )
+        ).to_client()
 
     def fit_config_fn(server_round: int) -> Dict[str, float]:
         return {
