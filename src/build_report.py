@@ -42,7 +42,7 @@ def _comparison_markdown(metrics_dir: Path) -> str:
     if not cmp_path.exists():
         return "Comparison table not found. Run `bash scripts/run_compare.sh`."
     df = pd.read_csv(cmp_path)
-    return df.to_markdown(index=False)
+    return _df_to_markdown(df)
 
 
 def _sweep_markdown(metrics_dir: Path) -> str:
@@ -50,7 +50,22 @@ def _sweep_markdown(metrics_dir: Path) -> str:
     if not sweep_path.exists():
         return "FedProx sweep not found. Run `bash scripts/run_fedprox_sweep.sh` (optional)."
     df = pd.read_csv(sweep_path)
-    return df.to_markdown(index=False)
+    return _df_to_markdown(df)
+
+
+def _df_to_markdown(df: pd.DataFrame) -> str:
+    if df.empty:
+        return "_No rows_"
+
+    headers = [str(c) for c in df.columns]
+    lines: List[str] = []
+    lines.append("| " + " | ".join(headers) + " |")
+    lines.append("| " + " | ".join(["---"] * len(headers)) + " |")
+
+    for row in df.itertuples(index=False):
+        cells = [str(x) for x in row]
+        lines.append("| " + " | ".join(cells) + " |")
+    return "\n".join(lines)
 
 
 def build_report(project_root: Path) -> str:
