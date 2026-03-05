@@ -1,0 +1,16 @@
+{
+  "experiment": "centralized_baseline",
+  "method": "centralized",
+  "epochs": 3,
+  "elapsed_seconds": 581.5041702500021,
+  "best_auc": 0.84375,
+  "best_checkpoint": "results/checkpoints/centralized_baseline_best.pt",
+  "test_loss": 1.0114204023893063,
+  "test_metrics": {
+    "auc": 0.8668310322156476,
+    "f1": 0.7807807807807807,
+    "sensitivity": 0.9999999999999973,
+    "specificity": 0.06410256410256383,
+    "accuracy": 0.6490384615384616
+  }
+}

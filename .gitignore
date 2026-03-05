@@ -27,6 +27,9 @@ results/checkpoints/*
 !results/metrics/.gitkeep
 !results/plots/.gitkeep
 !results/checkpoints/.gitkeep
+!results/metrics/*.csv
+!results/metrics/*.json
+!results/plots/*.png
 
 # Experiment trackers
 mlruns/
