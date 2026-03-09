@@ -8,7 +8,7 @@ from typing import Dict, List, Sequence, Tuple
 import numpy as np
 import pandas as pd
 import torch
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, Dataset, Subset
 from torchvision import datasets, transforms
 
 from .utils import load_yaml, set_seed
@@ -198,6 +198,42 @@ def build_clinic_summary(
             }
         )
     return pd.DataFrame(rows)
+
+
+def extract_targets(dataset: Dataset) -> List[int]:
+    if isinstance(dataset, Subset):
+        parent_targets = extract_targets(dataset.dataset)
+        return [int(parent_targets[i]) for i in dataset.indices]
+
+    targets = getattr(dataset, "targets", None)
+    if targets is not None:
+        if isinstance(targets, torch.Tensor):
+            return [int(x) for x in targets.tolist()]
+        return [int(x) for x in list(targets)]
+
+    inferred: List[int] = []
+    for i in range(len(dataset)):
+        _, target = dataset[i]
+        inferred.append(int(target))
+    return inferred
+
+
+def compute_class_weights(dataset: Dataset, num_classes: int = 2) -> torch.Tensor:
+    targets = np.array(extract_targets(dataset), dtype=np.int64)
+    counts = np.bincount(targets, minlength=num_classes)
+    total = counts.sum()
+
+    weights = np.zeros(num_classes, dtype=np.float32)
+    for c in range(num_classes):
+        if counts[c] > 0:
+            weights[c] = total / (num_classes * counts[c])
+        else:
+            weights[c] = 0.0
+
+    nonzero = weights > 0
+    if nonzero.any():
+        weights[nonzero] = weights[nonzero] / weights[nonzero].mean()
+    return torch.tensor(weights, dtype=torch.float32)
 
 
 def create_or_load_partitions(labels: Sequence[int], cfg: Dict) -> Dict[str, List[int]]:

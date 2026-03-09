@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import math
 from time import perf_counter
 from typing import Dict, List
 
@@ -9,8 +10,8 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 
-from .dataset import load_datasets
-from .evaluate import evaluate_model
+from .dataset import compute_class_weights, load_datasets
+from .evaluate import collect_predictions, evaluate_from_predictions, tune_threshold
 from .model import build_model
 from .utils import make_output_paths, plot_metric, save_dataframe, save_json, set_seed
 from .utils import load_yaml as load_cfg
@@ -70,14 +71,30 @@ def main() -> None:
         num_classes=int(cfg.get("num_classes", 2)),
     ).to(device)
 
-    criterion = nn.CrossEntropyLoss()
+    use_class_weights = bool(cfg.get("use_class_weights", True))
+    threshold_tuning = bool(cfg.get("threshold_tuning", True))
+    selection_metric = str(cfg.get("selection_metric", "balanced_accuracy"))
+    threshold_metric = str(cfg.get("threshold_metric", "balanced_accuracy"))
+    threshold_min = float(cfg.get("threshold_min", 0.1))
+    threshold_max = float(cfg.get("threshold_max", 0.9))
+    threshold_step = float(cfg.get("threshold_step", 0.02))
+
+    class_weights = None
+    if use_class_weights:
+        class_weights = compute_class_weights(train_ds, num_classes=int(cfg.get("num_classes", 2))).to(device)
+        print(f"Using class weights: {class_weights.detach().cpu().tolist()}")
+
+    criterion = nn.CrossEntropyLoss(weight=class_weights)
+    eval_criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(
         model.parameters(),
         lr=float(cfg.get("lr", 1e-3)),
         weight_decay=float(cfg.get("weight_decay", 1e-4)),
     )
 
-    best_auc = -1.0
+    best_score = float("-inf")
+    best_auc = float("-inf")
+    best_threshold = 0.5
     best_ckpt = paths.checkpoints_dir / f"{exp_name}_best.pt"
     epochs = int(cfg.get("epochs", 3))
 
@@ -86,7 +103,22 @@ def main() -> None:
     start = perf_counter()
     for epoch in range(1, epochs + 1):
         train_loss = train_one_epoch(model, train_loader, optimizer, criterion, device)
-        val_loss, val_metrics = evaluate_model(model, val_loader, device, criterion)
+
+        val_loss, y_val, p_val = collect_predictions(model, val_loader, device, eval_criterion)
+        if threshold_tuning:
+            val_threshold = tune_threshold(
+                y_true=y_val,
+                y_prob=p_val,
+                metric=threshold_metric,
+                threshold_min=threshold_min,
+                threshold_max=threshold_max,
+                threshold_step=threshold_step,
+                default_threshold=0.5,
+            )
+        else:
+            val_threshold = 0.5
+
+        val_metrics = evaluate_from_predictions(y_true=y_val, y_prob=p_val, threshold=val_threshold)
 
         row = {
             "epoch": epoch,
@@ -96,19 +128,32 @@ def main() -> None:
         }
         history.append(row)
 
-        if val_metrics.get("auc", float("nan")) > best_auc:
-            best_auc = val_metrics["auc"]
+        score = float(val_metrics.get(selection_metric, float("nan")))
+        if math.isnan(score):
+            score = float(val_metrics.get("auc", float("nan")))
+
+        if not math.isnan(score) and score > best_score:
+            best_score = score
+            best_auc = float(val_metrics.get("auc", float("nan")))
+            best_threshold = float(val_threshold)
             torch.save(model.state_dict(), best_ckpt)
 
         print(
             f"Epoch {epoch}/{epochs} | train_loss={train_loss:.4f} "
-            f"val_loss={val_loss:.4f} auc={val_metrics['auc']:.4f}"
+            f"val_loss={val_loss:.4f} auc={val_metrics['auc']:.4f} "
+            f"bacc={val_metrics['balanced_accuracy']:.4f} thr={val_metrics['threshold']:.2f}"
         )
 
     elapsed = perf_counter() - start
 
+    if not best_ckpt.exists():
+        torch.save(model.state_dict(), best_ckpt)
+        best_threshold = 0.5
+
     model.load_state_dict(torch.load(best_ckpt, map_location=device))
-    test_loss, test_metrics = evaluate_model(model, test_loader, device, criterion)
+    test_loss, y_test, p_test = collect_predictions(model, test_loader, device, eval_criterion)
+    test_metrics = evaluate_from_predictions(y_true=y_test, y_prob=p_test, threshold=best_threshold)
+    test_metrics_default = evaluate_from_predictions(y_true=y_test, y_prob=p_test, threshold=0.5)
 
     history_df = pd.DataFrame(history)
     metrics_csv = paths.metrics_dir / f"{exp_name}_epoch_metrics.csv"
@@ -118,11 +163,18 @@ def main() -> None:
         "experiment": exp_name,
         "method": "centralized",
         "epochs": epochs,
+        "use_class_weights": use_class_weights,
+        "threshold_tuning": threshold_tuning,
+        "selection_metric": selection_metric,
+        "threshold_metric": threshold_metric,
+        "best_selection_score": float(best_score),
+        "best_threshold": float(best_threshold),
         "elapsed_seconds": elapsed,
         "best_auc": float(best_auc),
         "best_checkpoint": str(best_ckpt),
         "test_loss": float(test_loss),
         "test_metrics": test_metrics,
+        "test_metrics_threshold_0_5": test_metrics_default,
     }
     summary_json = paths.metrics_dir / f"{exp_name}_summary.json"
     save_json(summary, summary_json)
@@ -141,6 +193,7 @@ def main() -> None:
     print(f"Metrics: {metrics_csv}")
     print(f"Summary: {summary_json}")
     print(f"Best checkpoint: {best_ckpt}")
+    print(f"Best threshold: {best_threshold:.2f} ({selection_metric})")
     print(f"Test metrics: {test_metrics}")
     print(f"Elapsed: {elapsed:.2f}s")
 

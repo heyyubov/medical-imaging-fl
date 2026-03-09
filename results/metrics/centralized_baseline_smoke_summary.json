@@ -2,15 +2,40 @@
   "experiment": "centralized_baseline_smoke",
   "method": "centralized",
   "epochs": 1,
-  "elapsed_seconds": 0.4671243749326095,
+  "use_class_weights": true,
+  "threshold_tuning": true,
+  "selection_metric": "balanced_accuracy",
+  "threshold_metric": "balanced_accuracy",
+  "best_selection_score": 0.5499999999999283,
+  "best_threshold": 0.3500000000000001,
+  "elapsed_seconds": 0.5300809160016797,
   "best_auc": 0.45,
   "best_checkpoint": "results/checkpoints/centralized_baseline_smoke_best.pt",
   "test_loss": 0.6979865729808807,
   "test_metrics": {
     "auc": 0.4666666666666667,
+    "f1": 0.3076923076923077,
+    "sensitivity": 0.33333333333327775,
+    "specificity": 0.49999999999995,
+    "balanced_accuracy": 0.4166666666666139,
+    "accuracy": 0.4375,
+    "tp": 2.0,
+    "tn": 5.0,
+    "fp": 5.0,
+    "fn": 4.0,
+    "threshold": 0.3500000000000001
+  },
+  "test_metrics_threshold_0_5": {
+    "auc": 0.4666666666666667,
     "f1": 0.0,
     "sensitivity": 0.0,
     "specificity": 0.9999999999999,
-    "accuracy": 0.625
+    "balanced_accuracy": 0.49999999999995,
+    "accuracy": 0.625,
+    "tp": 0.0,
+    "tn": 10.0,
+    "fp": 0.0,
+    "fn": 6.0,
+    "threshold": 0.5
   }
 }

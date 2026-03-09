@@ -25,6 +25,14 @@ def _read_json(path: Path) -> Dict:
         return json.load(f)
 
 
+def _balanced_accuracy(metrics: Dict) -> float | None:
+    sens = metrics.get("sensitivity")
+    spec = metrics.get("specificity")
+    if sens is None or spec is None:
+        return None
+    return 0.5 * (float(sens) + float(spec))
+
+
 def _add_centralized_row(rows: List[Dict], metrics_dir: Path) -> None:
     summary_path = metrics_dir / "centralized_baseline_summary.json"
     if not summary_path.exists():
@@ -40,7 +48,9 @@ def _add_centralized_row(rows: List[Dict], metrics_dir: Path) -> None:
             "f1": test_metrics.get("f1"),
             "sensitivity": test_metrics.get("sensitivity"),
             "specificity": test_metrics.get("specificity"),
+            "balanced_accuracy": test_metrics.get("balanced_accuracy", _balanced_accuracy(test_metrics)),
             "accuracy": test_metrics.get("accuracy"),
+            "threshold": test_metrics.get("threshold", summary.get("best_threshold", 0.5)),
             "elapsed_seconds": summary.get("elapsed_seconds"),
         }
     )
@@ -57,18 +67,26 @@ def _add_federated_row(rows: List[Dict], metrics_dir: Path, experiment_name: str
     if rounds_df.empty:
         return
 
-    best_idx = rounds_df["auc"].idxmax()
+    selection_col = "balanced_accuracy" if "balanced_accuracy" in rounds_df.columns else "auc"
+    best_idx = rounds_df[selection_col].idxmax()
     best_row = rounds_df.loc[best_idx]
 
     rows.append(
         {
             "method": experiment_name,
-            "selection": f"best_auc_round_{int(best_row['round'])}",
+            "selection": f"best_{selection_col}_round_{int(best_row['round'])}",
             "auc": float(best_row.get("auc", float("nan"))),
             "f1": float(best_row.get("f1", float("nan"))),
             "sensitivity": float(best_row.get("sensitivity", float("nan"))),
             "specificity": float(best_row.get("specificity", float("nan"))),
+            "balanced_accuracy": float(
+                best_row.get(
+                    "balanced_accuracy",
+                    0.5 * (float(best_row.get("sensitivity", float("nan"))) + float(best_row.get("specificity", float("nan")))),
+                )
+            ),
             "accuracy": float(best_row.get("accuracy", float("nan"))),
+            "threshold": float(best_row.get("threshold", summary.get("best_threshold", 0.5))),
             "elapsed_seconds": summary.get("elapsed_seconds"),
         }
     )

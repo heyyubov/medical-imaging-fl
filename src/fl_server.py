@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import math
 from time import perf_counter
 from typing import Dict, List
 
@@ -18,7 +19,7 @@ from .dataset import (
     load_datasets,
     split_client_train_val,
 )
-from .evaluate import evaluate_model
+from .evaluate import collect_predictions, evaluate_from_predictions, tune_threshold
 from .fl_client import FedMedClient
 from .model import build_model
 from .strategies import build_strategy
@@ -48,7 +49,7 @@ def main() -> None:
     paths = make_output_paths(cfg.get("output_root", "results"))
     exp_name = cfg.get("experiment_name", cfg.get("method", "federated"))
 
-    train_ds, _, test_ds, train_labels = load_datasets(cfg)
+    train_ds, val_ds, test_ds, train_labels = load_datasets(cfg)
     partitions = create_or_load_partitions(labels=train_labels, cfg=cfg)
     clinic_names = get_clinic_names(cfg, int(cfg["num_clients"]))
     clinic_df = build_clinic_summary(partitions=partitions, labels=train_labels, clinic_names=clinic_names)
@@ -62,9 +63,17 @@ def main() -> None:
         shuffle=False,
         num_workers=int(cfg.get("num_workers", 0)),
     )
+    val_loader = DataLoader(
+        val_ds,
+        batch_size=int(cfg.get("batch_size", 16)),
+        shuffle=False,
+        num_workers=int(cfg.get("num_workers", 0)),
+    )
 
     round_metrics: List[Dict[str, float]] = []
-    best_auc = -1.0
+    best_auc = float("-inf")
+    best_selection_score = float("-inf")
+    best_threshold = 0.5
     best_ckpt = paths.checkpoints_dir / f"{exp_name}_best.pt"
     clinic_csv = paths.metrics_dir / f"{exp_name}_clinic_summary.csv"
     clinic_plot = paths.plots_dir / f"{exp_name}_clinic_distribution.png"
@@ -104,17 +113,50 @@ def main() -> None:
         }
 
     def evaluate_fn(server_round: int, parameters, _config):
-        nonlocal best_auc
+        nonlocal best_auc, best_selection_score, best_threshold
+        threshold_tuning = bool(cfg.get("threshold_tuning", True))
+        threshold_metric = str(cfg.get("threshold_metric", "balanced_accuracy"))
+        selection_metric = str(cfg.get("selection_metric", "balanced_accuracy"))
+
         model = build_model(cfg.get("model_name", "resnet18"), int(cfg.get("num_classes", 2))).to(device)
         set_model_parameters(model, parameters)
 
-        loss, metrics = evaluate_model(model, test_loader, device=device, criterion=criterion)
-        row = {"round": server_round, "loss": loss, **metrics}
+        val_loss, y_val, p_val = collect_predictions(model, val_loader, device=device, criterion=criterion)
+        if threshold_tuning:
+            threshold = tune_threshold(
+                y_true=y_val,
+                y_prob=p_val,
+                metric=threshold_metric,
+                threshold_min=float(cfg.get("threshold_min", 0.1)),
+                threshold_max=float(cfg.get("threshold_max", 0.9)),
+                threshold_step=float(cfg.get("threshold_step", 0.02)),
+                default_threshold=0.5,
+            )
+        else:
+            threshold = 0.5
+
+        val_metrics = evaluate_from_predictions(y_true=y_val, y_prob=p_val, threshold=threshold)
+
+        loss, y_test, p_test = collect_predictions(model, test_loader, device=device, criterion=criterion)
+        metrics = evaluate_from_predictions(y_true=y_test, y_prob=p_test, threshold=threshold)
+        row = {
+            "round": server_round,
+            "loss": loss,
+            "val_loss": val_loss,
+            "val_auc": float(val_metrics.get("auc", float("nan"))),
+            "val_balanced_accuracy": float(val_metrics.get("balanced_accuracy", float("nan"))),
+            **metrics,
+        }
         round_metrics.append(row)
 
-        auc = metrics.get("auc", float("nan"))
-        if np.isfinite(auc) and auc > best_auc:
-            best_auc = auc
+        score = float(val_metrics.get(selection_metric, float("nan")))
+        if math.isnan(score):
+            score = float(val_metrics.get("auc", float("nan")))
+
+        if not math.isnan(score) and score > best_selection_score:
+            best_selection_score = score
+            best_threshold = float(threshold)
+            best_auc = float(metrics.get("auc", float("nan")))
             torch.save(model.state_dict(), best_ckpt)
 
         return float(loss), metrics
@@ -142,6 +184,12 @@ def main() -> None:
         "experiment": exp_name,
         "method": cfg.get("method", "fedavg"),
         "num_clients": num_clients,
+        "use_class_weights": bool(cfg.get("use_class_weights", True)),
+        "threshold_tuning": bool(cfg.get("threshold_tuning", True)),
+        "selection_metric": str(cfg.get("selection_metric", "balanced_accuracy")),
+        "threshold_metric": str(cfg.get("threshold_metric", "balanced_accuracy")),
+        "best_selection_score": float(best_selection_score),
+        "best_threshold": float(best_threshold),
         "clinic_names": clinic_names,
         "clinic_summary_csv": str(clinic_csv),
         "clinic_distribution_plot": str(clinic_plot),

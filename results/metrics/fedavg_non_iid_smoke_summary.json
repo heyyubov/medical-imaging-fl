@@ -2,6 +2,12 @@
   "experiment": "fedavg_non_iid_smoke",
   "method": "fedavg",
   "num_clients": 3,
+  "use_class_weights": true,
+  "threshold_tuning": true,
+  "selection_metric": "balanced_accuracy",
+  "threshold_metric": "balanced_accuracy",
+  "best_selection_score": 0.6593406593405804,
+  "best_threshold": 0.45000000000000007,
   "clinic_names": [
     "Sunrise Medical Center",
     "Riverside Community Hospital",
@@ -10,83 +16,119 @@
   "clinic_summary_csv": "results/metrics/fedavg_non_iid_smoke_clinic_summary.csv",
   "clinic_distribution_plot": "results/plots/fedavg_non_iid_smoke_clinic_distribution.png",
   "rounds": 1,
-  "elapsed_seconds": 8.64622099999906,
-  "best_auc": 0.6145833333333333,
+  "elapsed_seconds": 8.73481691699999,
+  "best_auc": 0.5,
   "best_checkpoint": "results/checkpoints/fedavg_non_iid_smoke_best.pt",
   "history": {
     "losses_distributed": [
       [
         1,
-        0.704129226067487
+        0.6873660718693453
       ]
     ],
     "metrics_distributed": {
-      "sensitivity": [
+      "tn": [
         [
           1,
-          0.9215686274505818
+          1.5294117647058822
         ]
       ],
       "specificity": [
         [
           1,
-          0.23529411764694116
+          0.6862745098036045
+        ]
+      ],
+      "fn": [
+        [
+          1,
+          2.0588235294117645
+        ]
+      ],
+      "threshold": [
+        [
+          1,
+          0.5
+        ]
+      ],
+      "tp": [
+        [
+          1,
+          1.8823529411764706
         ]
       ],
       "auc": [
         [
           1,
-          0.3333333333333333
-        ]
-      ],
-      "f1": [
-        [
-          1,
-          0.7068627450980393
+          0.5490196078431372
         ]
       ],
       "accuracy": [
         [
           1,
-          0.5882352941176471
+          0.5294117647058824
+        ]
+      ],
+      "f1": [
+        [
+          1,
+          0.34224598930481287
+        ]
+      ],
+      "fp": [
+        [
+          1,
+          0.7058823529411765
+        ]
+      ],
+      "sensitivity": [
+        [
+          1,
+          0.31372549019602614
+        ]
+      ],
+      "balanced_accuracy": [
+        [
+          1,
+          0.49999999999981526
         ]
       ]
     },
     "losses_centralized": [
       [
         0,
-        0.6772436499595642
+        0.7256546974182129
       ],
       [
         1,
-        0.6852110266685486
+        0.7047788977622986
       ]
     ],
     "metrics_centralized": {
       "auc": [
         [
           0,
-          0.6145833333333333
+          0.5
         ],
         [
           1,
-          0.46875
+          0.5104166666666666
         ]
       ],
       "f1": [
         [
           0,
-          0.75
+          0.47619047619047616
         ],
         [
           1,
-          0.6206896551724138
+          0.6666666666666666
         ]
       ],
       "sensitivity": [
         [
           0,
-          0.9999999999999166
+          0.41666666666663194
         ],
         [
           1,
@@ -96,21 +138,81 @@
       "specificity": [
         [
           0,
-          0.0
+          0.4999999999999375
         ],
         [
           1,
-          0.0
+          0.24999999999996875
+        ]
+      ],
+      "balanced_accuracy": [
+        [
+          0,
+          0.45833333333328474
+        ],
+        [
+          1,
+          0.49999999999995315
         ]
       ],
       "accuracy": [
         [
           0,
-          0.6
+          0.45
         ],
         [
           1,
-          0.45
+          0.55
+        ]
+      ],
+      "tp": [
+        [
+          0,
+          5.0
+        ],
+        [
+          1,
+          9.0
+        ]
+      ],
+      "tn": [
+        [
+          0,
+          4.0
+        ],
+        [
+          1,
+          2.0
+        ]
+      ],
+      "fp": [
+        [
+          0,
+          4.0
+        ],
+        [
+          1,
+          6.0
+        ]
+      ],
+      "fn": [
+        [
+          0,
+          7.0
+        ],
+        [
+          1,
+          3.0
+        ]
+      ],
+      "threshold": [
+        [
+          0,
+          0.45000000000000007
+        ],
+        [
+          1,
+          0.45000000000000007
         ]
       ]
     }

@@ -7,6 +7,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
+from .dataset import compute_class_weights
 from .evaluate import evaluate_model
 from .model import build_model
 from .utils import get_model_parameters, set_model_parameters
@@ -45,7 +46,14 @@ class FedMedClient(fl.client.NumPyClient):
             num_workers=num_workers,
         )
 
-        self.criterion = nn.CrossEntropyLoss()
+        use_class_weights = bool(cfg.get("use_class_weights", True))
+        class_weights = None
+        if use_class_weights:
+            class_weights = compute_class_weights(train_dataset, num_classes=int(cfg.get("num_classes", 2))).to(
+                self.device
+            )
+        self.criterion = nn.CrossEntropyLoss(weight=class_weights)
+        self.eval_criterion = nn.CrossEntropyLoss()
 
     def get_parameters(self, config):
         return get_model_parameters(self.model)
@@ -98,6 +106,7 @@ class FedMedClient(fl.client.NumPyClient):
             model=self.model,
             dataloader=self.val_loader,
             device=self.device,
-            criterion=self.criterion,
+            criterion=self.eval_criterion,
+            threshold=0.5,
         )
         return float(loss), len(self.val_loader.dataset), metrics

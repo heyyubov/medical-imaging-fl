@@ -37,6 +37,16 @@ def _fmt(x: float | int | None) -> str:
         return str(x)
 
 
+def _get_metric(metrics: Dict, key: str, default: float | None = None) -> float | None:
+    value = metrics.get(key, default)
+    if value is None:
+        return default
+    try:
+        return float(value)
+    except Exception:
+        return default
+
+
 def _comparison_markdown(metrics_dir: Path) -> str:
     cmp_path = metrics_dir / "comparison_table.csv"
     if not cmp_path.exists():
@@ -109,6 +119,13 @@ def build_report(project_root: Path) -> str:
 
     c_summary_path = metrics_dir / "centralized_baseline_summary.json"
     c_summary = _load_json(c_summary_path) if c_summary_path.exists() else {}
+    c_test = c_summary.get("test_metrics", {})
+    c_sens = _get_metric(c_test, "sensitivity")
+    c_spec = _get_metric(c_test, "specificity")
+    c_bal_acc = _get_metric(c_test, "balanced_accuracy")
+    if c_bal_acc is None and c_sens is not None and c_spec is not None:
+        c_bal_acc = 0.5 * (c_sens + c_spec)
+    c_threshold = _get_metric(c_test, "threshold", _get_metric(c_summary, "best_threshold", 0.5))
 
     report = f"""# Federated Learning for Medical Imaging - Technical Report
 
@@ -139,11 +156,14 @@ Project story: **3 clinics train one shared model while raw patient images never
 {_clinic_markdown(metrics_dir)}
 
 ### 4.3 Centralized Test Snapshot
-- Test AUC: {_fmt(c_summary.get("test_metrics", {}).get("auc"))}
-- Test F1: {_fmt(c_summary.get("test_metrics", {}).get("f1"))}
-- Test Sensitivity: {_fmt(c_summary.get("test_metrics", {}).get("sensitivity"))}
-- Test Specificity: {_fmt(c_summary.get("test_metrics", {}).get("specificity"))}
-- Test Accuracy: {_fmt(c_summary.get("test_metrics", {}).get("accuracy"))}
+- Test AUC: {_fmt(_get_metric(c_test, "auc"))}
+- Test F1: {_fmt(_get_metric(c_test, "f1"))}
+- Test Sensitivity: {_fmt(c_sens)}
+- Test Specificity: {_fmt(c_spec)}
+- Test Balanced Accuracy: {_fmt(c_bal_acc)}
+- Test Accuracy: {_fmt(_get_metric(c_test, "accuracy"))}
+- Selected Threshold: {_fmt(c_threshold)}
+- Confusion (TP/TN/FP/FN): `{c_test.get("tp")} / {c_test.get("tn")} / {c_test.get("fp")} / {c_test.get("fn")}`
 
 ### 4.4 Plots
 {_plot_lines(project_root)}

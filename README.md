@@ -17,8 +17,11 @@ Default clinic setup (3 virtual hospitals):
 - End-to-end runnable pipeline
 - Reproducible configs and scripts
 - Saved metrics/plots/checkpoints
+- Calibration update: class-weighted training + validation threshold tuning
 - Final comparison table (`centralized vs fedavg vs fedprox`)
 - Auto-generated technical report
+
+See [CHANGELOG.md](CHANGELOG.md) for recent updates.
 
 ## Repository Structure
 
@@ -76,10 +79,12 @@ Set in configs:
 ## Quick Start
 
 ```bash
-python3 -m venv .venv
+python3.11 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+
+Recommended Python version: `3.11` (Flower/protobuf stack can fail on `3.14`).
 
 ## Run Experiments
 
@@ -99,6 +104,8 @@ bash scripts/run_fedprox.sh
 bash scripts/run_compare.sh
 bash scripts/run_report.sh
 ```
+
+All run scripts auto-detect `.venv/bin/python` if it exists, so they work even if the venv is not manually activated.
 
 ### Optional FedProx mu sweep
 
@@ -122,7 +129,10 @@ bash scripts/run_fedprox_sweep.sh
 - F1
 - Sensitivity
 - Specificity
+- Balanced accuracy
 - Accuracy
+- Confusion stats (TP/TN/FP/FN)
+- Selected classification threshold
 - Training time / communication rounds
 
 ## Notes

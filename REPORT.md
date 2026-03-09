@@ -1,6 +1,6 @@
 # Federated Learning for Medical Imaging - Technical Report
 
-Generated: 2026-03-05 03:10:33
+Generated: 2026-03-08 18:49:16
 
 ## 1. Problem
 We evaluate whether chest X-ray classification can be trained in a privacy-preserving setup where data remains local at each clinic.
@@ -21,11 +21,11 @@ Project story: **3 clinics train one shared model while raw patient images never
 
 ## 4. Results
 ### 4.1 Main Comparison
-| method | selection | auc | f1 | sensitivity | specificity | accuracy | elapsed_seconds |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| centralized | test | 0.8668310322156476 | 0.7807807807807807 | 0.9999999999999972 | 0.0641025641025638 | 0.6490384615384616 | 581.5041702500021 |
-| fedavg_non_iid | best_auc_round_3 | 0.9081908831908831 | 0.7707509881422925 | 0.9999999999999972 | 0.0085470085470085 | 0.6282051282051282 | 915.7220920830003 |
-| fedprox_non_iid | best_auc_round_3 | 0.9020710059171596 | 0.7738095238095238 | 0.9999999999999972 | 0.0256410256410255 | 0.6346153846153846 | 915.6711903750002 |
+| method | selection | auc | f1 | sensitivity | specificity | balanced_accuracy | accuracy | threshold | elapsed_seconds |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| centralized | test | 0.8668310322156476 | 0.7807807807807807 | 0.9999999999999972 | 0.0641025641025638 | 0.5320512820512806 | 0.6490384615384616 | 0.5 | 581.5041702500021 |
+| fedavg_non_iid | best_auc_round_3 | 0.9081908831908831 | 0.7707509881422925 | 0.9999999999999972 | 0.0085470085470085 | 0.5042735042735028 | 0.6282051282051282 | 0.5 | 915.7220920830003 |
+| fedprox_non_iid | best_auc_round_3 | 0.9020710059171596 | 0.7738095238095238 | 0.9999999999999972 | 0.0256410256410255 | 0.5128205128205113 | 0.6346153846153846 | 0.5 | 915.6711903750002 |
 
 ### 4.2 Three-Clinic Data Setup
 | clinic_id | clinic_name | num_samples | normal_count | pneumonia_count | pneumonia_ratio |
@@ -39,7 +39,10 @@ Project story: **3 clinics train one shared model while raw patient images never
 - Test F1: 0.7808
 - Test Sensitivity: 1.0000
 - Test Specificity: 0.0641
+- Test Balanced Accuracy: 0.5321
 - Test Accuracy: 0.6490
+- Selected Threshold: 0.5000
+- Confusion (TP/TN/FP/FN): `None / None / None / None`
 
 ### 4.4 Plots
 - `results/plots/centralized_baseline_auc_by_epoch.png`
