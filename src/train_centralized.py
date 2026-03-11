@@ -12,6 +12,7 @@ from torch.utils.data import DataLoader
 
 from .dataset import compute_class_weights, load_datasets
 from .evaluate import collect_predictions, evaluate_from_predictions, tune_threshold
+from .losses import build_train_criterion
 from .model import build_model
 from .utils import make_output_paths, plot_metric, save_dataframe, save_json, set_seed
 from .utils import load_yaml as load_cfg
@@ -78,13 +79,24 @@ def main() -> None:
     threshold_min = float(cfg.get("threshold_min", 0.1))
     threshold_max = float(cfg.get("threshold_max", 0.9))
     threshold_step = float(cfg.get("threshold_step", 0.02))
+    min_specificity_cfg = cfg.get("min_specificity")
+    min_specificity = float(min_specificity_cfg) if min_specificity_cfg is not None else None
+    loss_name = str(cfg.get("loss_name", "cross_entropy"))
+    focal_gamma = float(cfg.get("focal_gamma", 2.0))
 
     class_weights = None
     if use_class_weights:
         class_weights = compute_class_weights(train_ds, num_classes=int(cfg.get("num_classes", 2))).to(device)
         print(f"Using class weights: {class_weights.detach().cpu().tolist()}")
+    print(f"Train loss: {loss_name} (focal_gamma={focal_gamma:.2f})")
+    if min_specificity is not None:
+        print(f"Clinical threshold target: specificity >= {min_specificity:.2f}")
 
-    criterion = nn.CrossEntropyLoss(weight=class_weights)
+    criterion = build_train_criterion(
+        loss_name=loss_name,
+        class_weights=class_weights,
+        focal_gamma=focal_gamma,
+    )
     eval_criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(
         model.parameters(),
@@ -113,6 +125,7 @@ def main() -> None:
                 threshold_min=threshold_min,
                 threshold_max=threshold_max,
                 threshold_step=threshold_step,
+                min_specificity=min_specificity,
                 default_threshold=0.5,
             )
         else:
@@ -141,7 +154,8 @@ def main() -> None:
         print(
             f"Epoch {epoch}/{epochs} | train_loss={train_loss:.4f} "
             f"val_loss={val_loss:.4f} auc={val_metrics['auc']:.4f} "
-            f"bacc={val_metrics['balanced_accuracy']:.4f} thr={val_metrics['threshold']:.2f}"
+            f"bacc={val_metrics['balanced_accuracy']:.4f} "
+            f"spec={val_metrics['specificity']:.4f} thr={val_metrics['threshold']:.2f}"
         )
 
     elapsed = perf_counter() - start
@@ -164,9 +178,12 @@ def main() -> None:
         "method": "centralized",
         "epochs": epochs,
         "use_class_weights": use_class_weights,
+        "loss_name": loss_name,
+        "focal_gamma": focal_gamma,
         "threshold_tuning": threshold_tuning,
         "selection_metric": selection_metric,
         "threshold_metric": threshold_metric,
+        "min_specificity": min_specificity,
         "best_selection_score": float(best_score),
         "best_threshold": float(best_threshold),
         "elapsed_seconds": elapsed,

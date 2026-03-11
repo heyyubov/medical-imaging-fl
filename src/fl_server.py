@@ -74,6 +74,10 @@ def main() -> None:
     best_auc = float("-inf")
     best_selection_score = float("-inf")
     best_threshold = 0.5
+    min_specificity_cfg = cfg.get("min_specificity")
+    min_specificity = float(min_specificity_cfg) if min_specificity_cfg is not None else None
+    loss_name = str(cfg.get("loss_name", "cross_entropy"))
+    focal_gamma = float(cfg.get("focal_gamma", 2.0))
     best_ckpt = paths.checkpoints_dir / f"{exp_name}_best.pt"
     clinic_csv = paths.metrics_dir / f"{exp_name}_clinic_summary.csv"
     clinic_plot = paths.plots_dir / f"{exp_name}_clinic_distribution.png"
@@ -85,6 +89,9 @@ def main() -> None:
             f"  - {row.clinic_name}: n={row.num_samples}, "
             f"NORMAL={row.normal_count}, PNEUMONIA={row.pneumonia_count}"
         )
+    print(f"Train loss: {loss_name} (focal_gamma={focal_gamma:.2f})")
+    if min_specificity is not None:
+        print(f"Clinical threshold target: specificity >= {min_specificity:.2f}")
 
     def client_fn(cid: str):
         cid_key = str(cid)
@@ -130,6 +137,7 @@ def main() -> None:
                 threshold_min=float(cfg.get("threshold_min", 0.1)),
                 threshold_max=float(cfg.get("threshold_max", 0.9)),
                 threshold_step=float(cfg.get("threshold_step", 0.02)),
+                min_specificity=min_specificity,
                 default_threshold=0.5,
             )
         else:
@@ -145,6 +153,7 @@ def main() -> None:
             "val_loss": val_loss,
             "val_auc": float(val_metrics.get("auc", float("nan"))),
             "val_balanced_accuracy": float(val_metrics.get("balanced_accuracy", float("nan"))),
+            "val_specificity": float(val_metrics.get("specificity", float("nan"))),
             **metrics,
         }
         round_metrics.append(row)
@@ -185,9 +194,12 @@ def main() -> None:
         "method": cfg.get("method", "fedavg"),
         "num_clients": num_clients,
         "use_class_weights": bool(cfg.get("use_class_weights", True)),
+        "loss_name": loss_name,
+        "focal_gamma": focal_gamma,
         "threshold_tuning": bool(cfg.get("threshold_tuning", True)),
         "selection_metric": str(cfg.get("selection_metric", "balanced_accuracy")),
         "threshold_metric": str(cfg.get("threshold_metric", "balanced_accuracy")),
+        "min_specificity": min_specificity,
         "best_selection_score": float(best_selection_score),
         "best_threshold": float(best_threshold),
         "clinic_names": clinic_names,

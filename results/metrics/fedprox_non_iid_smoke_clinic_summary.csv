@@ -1,0 +1,4 @@
+clinic_id,clinic_name,num_samples,normal_count,pneumonia_count,pneumonia_ratio
+0,Sunrise Medical Center,21,19,2,0.09523809523809523
+1,Riverside Community Hospital,29,12,17,0.5862068965517241
+2,MetroCare Clinic,40,11,29,0.725

@@ -25,12 +25,15 @@ num_workers: 0
 lr: 0.001
 weight_decay: 0.0001
 use_class_weights: true
+loss_name: focal
+focal_gamma: 2.0
 threshold_tuning: true
 selection_metric: balanced_accuracy
 threshold_metric: balanced_accuracy
 threshold_min: 0.1
 threshold_max: 0.9
 threshold_step: 0.02
+min_specificity: 0.4
 fraction_fit: 1.0
 fraction_evaluate: 1.0
 client_val_fraction: 0.2

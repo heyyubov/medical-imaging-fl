@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.2.0 - Clinical Calibration Update
+
+### Added
+- Clinical threshold selection with a specificity target (`min_specificity`).
+- Imbalance-aware training loss selection via config:
+  - `loss_name: cross_entropy`
+  - `loss_name: focal` with `focal_gamma`
+- Shared training-loss configuration across centralized and federated pipelines.
+
+### Improved
+- Threshold tuning now first searches for thresholds that satisfy the specificity target,
+  then falls back to the best-specificity threshold if the target is unreachable.
+- Training logs now surface specificity alongside AUC/balanced accuracy.
+
+### Notes
+- New config keys:
+  - `loss_name`
+  - `focal_gamma`
+  - `min_specificity`
+
 ## v1.1.0 - Calibration Update
 
 ### Added

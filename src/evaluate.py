@@ -99,6 +99,7 @@ def tune_threshold(
     threshold_min: float = 0.1,
     threshold_max: float = 0.9,
     threshold_step: float = 0.02,
+    min_specificity: float | None = None,
     default_threshold: float = 0.5,
 ) -> float:
     if y_true.size == 0:
@@ -110,14 +111,47 @@ def tune_threshold(
 
     best_threshold = float(default_threshold)
     best_score = float("-inf")
+
+    feasible_threshold = None
+    feasible_score = float("-inf")
+
+    relaxed_threshold = None
+    relaxed_specificity = float("-inf")
+    relaxed_score = float("-inf")
+
     for thr in thresholds:
         metrics = binary_classification_metrics(y_true=y_true, y_prob=y_prob, threshold=float(thr))
         score = metrics.get(metric, float("nan"))
         if np.isnan(score):
             continue
-        if score > best_score:
-            best_score = float(score)
-            best_threshold = float(thr)
+        specificity = float(metrics.get("specificity", float("nan")))
+
+        if min_specificity is not None:
+            if not np.isnan(specificity) and specificity >= float(min_specificity):
+                if score > feasible_score:
+                    feasible_score = float(score)
+                    feasible_threshold = float(thr)
+
+            # If target specificity is not reachable, pick the threshold with the
+            # highest specificity, then highest metric score as tiebreak.
+            if not np.isnan(specificity) and (
+                specificity > relaxed_specificity or (specificity == relaxed_specificity and score > relaxed_score)
+            ):
+                relaxed_specificity = specificity
+                relaxed_score = float(score)
+                relaxed_threshold = float(thr)
+        else:
+            if score > best_score:
+                best_score = float(score)
+                best_threshold = float(thr)
+
+    if min_specificity is not None:
+        if feasible_threshold is not None:
+            return feasible_threshold
+        if relaxed_threshold is not None:
+            return relaxed_threshold
+        return float(default_threshold)
+
     return best_threshold
 
 

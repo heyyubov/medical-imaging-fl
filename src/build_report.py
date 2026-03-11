@@ -144,6 +144,8 @@ Project story: **3 clinics train one shared model while raw patient images never
 ## 3. Experimental Setup
 - Model: `{centralized_cfg.get("model_name", "resnet18")}`
 - Input size: `{centralized_cfg.get("image_size", 224)}`
+- Loss: `{centralized_cfg.get("loss_name", "cross_entropy")}` (focal_gamma=`{centralized_cfg.get("focal_gamma", "n/a")}`)
+- Threshold target (specificity): `{centralized_cfg.get("min_specificity", "none")}`
 - Clients: `{fedavg_cfg.get("num_clients", 3)}`
 - FedAvg rounds/local_epochs: `{fedavg_cfg.get("rounds", 'n/a')}` / `{fedavg_cfg.get("local_epochs", 'n/a')}`
 - FedProx rounds/local_epochs/mu: `{fedprox_cfg.get("rounds", 'n/a')}` / `{fedprox_cfg.get("local_epochs", 'n/a')}` / `{fedprox_cfg.get("prox_mu", 'n/a')}`

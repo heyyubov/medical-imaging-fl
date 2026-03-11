@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader, Dataset
 
 from .dataset import compute_class_weights
 from .evaluate import evaluate_model
+from .losses import build_train_criterion
 from .model import build_model
 from .utils import get_model_parameters, set_model_parameters
 
@@ -47,12 +48,18 @@ class FedMedClient(fl.client.NumPyClient):
         )
 
         use_class_weights = bool(cfg.get("use_class_weights", True))
+        loss_name = str(cfg.get("loss_name", "cross_entropy"))
+        focal_gamma = float(cfg.get("focal_gamma", 2.0))
         class_weights = None
         if use_class_weights:
             class_weights = compute_class_weights(train_dataset, num_classes=int(cfg.get("num_classes", 2))).to(
                 self.device
             )
-        self.criterion = nn.CrossEntropyLoss(weight=class_weights)
+        self.criterion = build_train_criterion(
+            loss_name=loss_name,
+            class_weights=class_weights,
+            focal_gamma=focal_gamma,
+        )
         self.eval_criterion = nn.CrossEntropyLoss()
 
     def get_parameters(self, config):

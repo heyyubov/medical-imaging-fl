@@ -17,7 +17,9 @@ Default clinic setup (3 virtual hospitals):
 - End-to-end runnable pipeline
 - Reproducible configs and scripts
 - Saved metrics/plots/checkpoints
-- Calibration update: class-weighted training + validation threshold tuning
+- Calibration update:
+  - class-weighted/focal training for imbalance
+  - validation threshold tuning with optional specificity target
 - Final comparison table (`centralized vs fedavg vs fedprox`)
 - Auto-generated technical report
 
@@ -47,6 +49,7 @@ See [CHANGELOG.md](CHANGELOG.md) for recent updates.
 │   ├── fedprox_sweep.py
 │   ├── fl_client.py
 │   ├── fl_server.py
+│   ├── losses.py
 │   ├── model.py
 │   ├── strategies.py
 │   ├── train_centralized.py
@@ -134,6 +137,13 @@ bash scripts/run_fedprox_sweep.sh
 - Confusion stats (TP/TN/FP/FN)
 - Selected classification threshold
 - Training time / communication rounds
+
+## Clinical Calibration Controls
+
+All are configurable in YAML:
+- `loss_name`: `cross_entropy` or `focal`
+- `focal_gamma`: focusing parameter for focal loss
+- `min_specificity`: optional threshold target during validation-based threshold tuning
 
 ## Notes
 

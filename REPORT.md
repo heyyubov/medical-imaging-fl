@@ -1,6 +1,6 @@
 # Federated Learning for Medical Imaging - Technical Report
 
-Generated: 2026-03-08 18:49:16
+Generated: 2026-03-10 21:28:49
 
 ## 1. Problem
 We evaluate whether chest X-ray classification can be trained in a privacy-preserving setup where data remains local at each clinic.
@@ -15,6 +15,8 @@ Project story: **3 clinics train one shared model while raw patient images never
 ## 3. Experimental Setup
 - Model: `resnet18`
 - Input size: `224`
+- Loss: `focal` (focal_gamma=`2.0`)
+- Threshold target (specificity): `0.4`
 - Clients: `3`
 - FedAvg rounds/local_epochs: `3` / `1`
 - FedProx rounds/local_epochs/mu: `3` / `1` / `0.01`
@@ -51,6 +53,7 @@ Project story: **3 clinics train one shared model while raw patient images never
 - `results/plots/fedavg_non_iid_auc_by_round.png`
 - `results/plots/fedavg_non_iid_smoke_auc_by_round.png`
 - `results/plots/fedprox_non_iid_auc_by_round.png`
+- `results/plots/fedprox_non_iid_smoke_auc_by_round.png`
 
 ## 5. Optional FedProx Sweep
 FedProx sweep not found. Run `bash scripts/run_fedprox_sweep.sh` (optional).
