@@ -1,0 +1,801 @@
+{
+  "experiment": "fedavg_non_iid_smoke",
+  "method": "fedavg",
+  "num_clients": 3,
+  "rounds": 1,
+  "best_round": 1,
+  "use_class_weights": true,
+  "sampling_strategy": "none",
+  "loss_name": "focal",
+  "focal_gamma": 2.0,
+  "selection_metric": "balanced_accuracy",
+  "best_selection_score": 0.5879120879120192,
+  "best_threshold": 0.3,
+  "selected_threshold_strategy": "target_specificity",
+  "selected_calibration_method": "isotonic",
+  "calibration_selection_metric": "ece",
+  "clinic_names": [
+    "Sunrise Medical Center",
+    "Riverside Community Hospital",
+    "MetroCare Clinic"
+  ],
+  "clinic_summary_csv": "results/metrics/fedavg_non_iid_smoke_clinic_summary.csv",
+  "clinic_distribution_plot": "results/plots/fedavg_non_iid_smoke_clinic_distribution.png",
+  "dataset_summary_csv": "results/metrics/fedavg_non_iid_smoke_dataset_summary.csv",
+  "per_clinic_metrics_csv": "results/metrics/fedavg_non_iid_smoke_per_clinic_metrics.csv",
+  "config_snapshot": "results/metrics/fedavg_non_iid_smoke_config.yaml",
+  "elapsed_seconds": 10.762068249983713,
+  "best_auc": 0.4375,
+  "best_checkpoint": "results/checkpoints/fedavg_non_iid_smoke_best.pt",
+  "validation_metrics_selected": {
+    "auc": 0.6263736263736264,
+    "pr_auc": 0.4809523809523809,
+    "accuracy": 0.55,
+    "balanced_accuracy": 0.5879120879120192,
+    "precision": 0.4166666666666667,
+    "recall": 0.7142857142857143,
+    "sensitivity": 0.7142857142856123,
+    "specificity": 0.46153846153842604,
+    "f1": 0.5263157894736842,
+    "brier_score": 0.2022727272727273,
+    "ece": 4.999889391399393e-14,
+    "log_loss": 0.5854490334933393,
+    "false_positive_rate": 0.538461538461497,
+    "false_negative_rate": 0.2857142857142449,
+    "expected_cost": 0.85,
+    "total_cost": 17.0,
+    "prevalence": 0.35,
+    "tp": 5.0,
+    "tn": 6.0,
+    "fp": 7.0,
+    "fn": 2.0,
+    "threshold": 0.3
+  },
+  "validation_metrics_threshold_0_5": {
+    "auc": 0.46153846153846156,
+    "pr_auc": 0.4431845465458911,
+    "accuracy": 0.45,
+    "balanced_accuracy": 0.37912087912084524,
+    "precision": 0.16666666666666666,
+    "recall": 0.14285714285714285,
+    "sensitivity": 0.14285714285712245,
+    "specificity": 0.615384615384568,
+    "f1": 0.15384615384615385,
+    "brier_score": 0.24739894013288505,
+    "ece": 0.18666757941246032,
+    "log_loss": 0.6880470282251077,
+    "false_positive_rate": 0.38461538461535505,
+    "false_negative_rate": 0.8571428571427346,
+    "expected_cost": 1.75,
+    "total_cost": 35.0,
+    "prevalence": 0.35,
+    "tp": 1.0,
+    "tn": 8.0,
+    "fp": 5.0,
+    "fn": 6.0,
+    "threshold": 0.5
+  },
+  "test_metrics": {
+    "auc": 0.4375,
+    "pr_auc": 0.5727272727272728,
+    "accuracy": 0.45,
+    "balanced_accuracy": 0.4374999999999557,
+    "precision": 0.5454545454545454,
+    "recall": 0.5,
+    "sensitivity": 0.4999999999999583,
+    "specificity": 0.37499999999995315,
+    "f1": 0.5217391304347826,
+    "brier_score": 0.3326704545454546,
+    "ece": 0.2875,
+    "log_loss": 0.8755171736430427,
+    "false_positive_rate": 0.6249999999999218,
+    "false_negative_rate": 0.4999999999999583,
+    "expected_cost": 1.75,
+    "total_cost": 35.0,
+    "prevalence": 0.6,
+    "tp": 6.0,
+    "tn": 3.0,
+    "fp": 5.0,
+    "fn": 6.0,
+    "threshold": 0.3
+  },
+  "test_metrics_threshold_0_5": {
+    "auc": 0.37500000000000006,
+    "pr_auc": 0.6300286050092552,
+    "accuracy": 0.35,
+    "balanced_accuracy": 0.3958333333332873,
+    "precision": 0.4,
+    "recall": 0.16666666666666666,
+    "sensitivity": 0.16666666666665278,
+    "specificity": 0.6249999999999218,
+    "f1": 0.23529411764705882,
+    "brier_score": 0.27316388917244466,
+    "ece": 0.2016479790210724,
+    "log_loss": 0.7403536746743958,
+    "false_positive_rate": 0.37499999999995315,
+    "false_negative_rate": 0.8333333333332639,
+    "expected_cost": 2.65,
+    "total_cost": 53.0,
+    "prevalence": 0.6,
+    "tp": 2.0,
+    "tn": 5.0,
+    "fp": 3.0,
+    "fn": 10.0,
+    "threshold": 0.5
+  },
+  "test_metrics_calibrated_threshold_0_5": {
+    "auc": 0.4375,
+    "pr_auc": 0.5727272727272728,
+    "accuracy": 0.4,
+    "balanced_accuracy": 0.4999999999999375,
+    "precision": 0.0,
+    "recall": 0.0,
+    "sensitivity": 0.0,
+    "specificity": 0.999999999999875,
+    "f1": 0.0,
+    "brier_score": 0.3326704545454546,
+    "ece": 0.2875,
+    "log_loss": 0.8755171736430427,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.9999999999999166,
+    "expected_cost": 3.0,
+    "total_cost": 60.0,
+    "prevalence": 0.6,
+    "tp": 0.0,
+    "tn": 8.0,
+    "fp": 0.0,
+    "fn": 12.0,
+    "threshold": 0.5
+  },
+  "threshold_summary_validation": {
+    "best_balanced_accuracy": {
+      "auc": 0.6263736263736264,
+      "pr_auc": 0.4809523809523809,
+      "accuracy": 0.55,
+      "balanced_accuracy": 0.5879120879120192,
+      "precision": 0.4166666666666667,
+      "recall": 0.7142857142857143,
+      "sensitivity": 0.7142857142856123,
+      "specificity": 0.46153846153842604,
+      "f1": 0.5263157894736842,
+      "brier_score": 0.2022727272727273,
+      "ece": 4.999889391399393e-14,
+      "log_loss": 0.5854490334933393,
+      "false_positive_rate": 0.538461538461497,
+      "false_negative_rate": 0.2857142857142449,
+      "expected_cost": 0.85,
+      "total_cost": 17.0,
+      "prevalence": 0.35,
+      "tp": 5.0,
+      "tn": 6.0,
+      "fp": 7.0,
+      "fn": 2.0,
+      "threshold": 0.3,
+      "youden_j": 0.17582417582403842
+    },
+    "best_f1": {
+      "auc": 0.6263736263736264,
+      "pr_auc": 0.4809523809523809,
+      "accuracy": 0.55,
+      "balanced_accuracy": 0.5879120879120192,
+      "precision": 0.4166666666666667,
+      "recall": 0.7142857142857143,
+      "sensitivity": 0.7142857142856123,
+      "specificity": 0.46153846153842604,
+      "f1": 0.5263157894736842,
+      "brier_score": 0.2022727272727273,
+      "ece": 4.999889391399393e-14,
+      "log_loss": 0.5854490334933393,
+      "false_positive_rate": 0.538461538461497,
+      "false_negative_rate": 0.2857142857142449,
+      "expected_cost": 0.85,
+      "total_cost": 17.0,
+      "prevalence": 0.35,
+      "tp": 5.0,
+      "tn": 6.0,
+      "fp": 7.0,
+      "fn": 2.0,
+      "threshold": 0.3,
+      "youden_j": 0.17582417582403842
+    },
+    "best_youden_j": {
+      "auc": 0.6263736263736264,
+      "pr_auc": 0.4809523809523809,
+      "accuracy": 0.55,
+      "balanced_accuracy": 0.5879120879120192,
+      "precision": 0.4166666666666667,
+      "recall": 0.7142857142857143,
+      "sensitivity": 0.7142857142856123,
+      "specificity": 0.46153846153842604,
+      "f1": 0.5263157894736842,
+      "brier_score": 0.2022727272727273,
+      "ece": 4.999889391399393e-14,
+      "log_loss": 0.5854490334933393,
+      "false_positive_rate": 0.538461538461497,
+      "false_negative_rate": 0.2857142857142449,
+      "expected_cost": 0.85,
+      "total_cost": 17.0,
+      "prevalence": 0.35,
+      "tp": 5.0,
+      "tn": 6.0,
+      "fp": 7.0,
+      "fn": 2.0,
+      "threshold": 0.3,
+      "youden_j": 0.17582417582403842
+    },
+    "best_expected_cost": {
+      "auc": 0.6263736263736264,
+      "pr_auc": 0.4809523809523809,
+      "accuracy": 0.35,
+      "balanced_accuracy": 0.49999999999992856,
+      "precision": 0.35,
+      "recall": 1.0,
+      "sensitivity": 0.9999999999998571,
+      "specificity": 0.0,
+      "f1": 0.5185185185185185,
+      "brier_score": 0.2022727272727273,
+      "ece": 4.999889391399393e-14,
+      "log_loss": 0.5854490334933393,
+      "false_positive_rate": 0.9999999999999231,
+      "false_negative_rate": 0.0,
+      "expected_cost": 0.65,
+      "total_cost": 13.0,
+      "prevalence": 0.35,
+      "tp": 7.0,
+      "tn": 0.0,
+      "fp": 13.0,
+      "fn": 0.0,
+      "threshold": 0.0,
+      "youden_j": -1.4288570326925765e-13
+    },
+    "target_specificity": {
+      "auc": 0.6263736263736264,
+      "pr_auc": 0.4809523809523809,
+      "accuracy": 0.55,
+      "balanced_accuracy": 0.5879120879120192,
+      "precision": 0.4166666666666667,
+      "recall": 0.7142857142857143,
+      "sensitivity": 0.7142857142856123,
+      "specificity": 0.46153846153842604,
+      "f1": 0.5263157894736842,
+      "brier_score": 0.2022727272727273,
+      "ece": 4.999889391399393e-14,
+      "log_loss": 0.5854490334933393,
+      "false_positive_rate": 0.538461538461497,
+      "false_negative_rate": 0.2857142857142449,
+      "expected_cost": 0.85,
+      "total_cost": 17.0,
+      "prevalence": 0.35,
+      "tp": 5.0,
+      "tn": 6.0,
+      "fp": 7.0,
+      "fn": 2.0,
+      "threshold": 0.3,
+      "youden_j": 0.17582417582403842
+    },
+    "target_recall": null
+  },
+  "threshold_summary_test": {
+    "best_balanced_accuracy": {
+      "auc": 0.4375,
+      "pr_auc": 0.5727272727272728,
+      "accuracy": 0.6,
+      "balanced_accuracy": 0.4999999999999583,
+      "precision": 0.6,
+      "recall": 1.0,
+      "sensitivity": 0.9999999999999166,
+      "specificity": 0.0,
+      "f1": 0.75,
+      "brier_score": 0.3326704545454546,
+      "ece": 0.2875,
+      "log_loss": 0.8755171736430427,
+      "false_positive_rate": 0.999999999999875,
+      "false_negative_rate": 0.0,
+      "expected_cost": 0.4,
+      "total_cost": 8.0,
+      "prevalence": 0.6,
+      "tp": 12.0,
+      "tn": 0.0,
+      "fp": 8.0,
+      "fn": 0.0,
+      "threshold": 0.0,
+      "youden_j": -8.337774914934926e-14
+    },
+    "best_f1": {
+      "auc": 0.4375,
+      "pr_auc": 0.5727272727272728,
+      "accuracy": 0.6,
+      "balanced_accuracy": 0.4999999999999583,
+      "precision": 0.6,
+      "recall": 1.0,
+      "sensitivity": 0.9999999999999166,
+      "specificity": 0.0,
+      "f1": 0.75,
+      "brier_score": 0.3326704545454546,
+      "ece": 0.2875,
+      "log_loss": 0.8755171736430427,
+      "false_positive_rate": 0.999999999999875,
+      "false_negative_rate": 0.0,
+      "expected_cost": 0.4,
+      "total_cost": 8.0,
+      "prevalence": 0.6,
+      "tp": 12.0,
+      "tn": 0.0,
+      "fp": 8.0,
+      "fn": 0.0,
+      "threshold": 0.0,
+      "youden_j": -8.337774914934926e-14
+    },
+    "best_youden_j": {
+      "auc": 0.4375,
+      "pr_auc": 0.5727272727272728,
+      "accuracy": 0.6,
+      "balanced_accuracy": 0.4999999999999583,
+      "precision": 0.6,
+      "recall": 1.0,
+      "sensitivity": 0.9999999999999166,
+      "specificity": 0.0,
+      "f1": 0.75,
+      "brier_score": 0.3326704545454546,
+      "ece": 0.2875,
+      "log_loss": 0.8755171736430427,
+      "false_positive_rate": 0.999999999999875,
+      "false_negative_rate": 0.0,
+      "expected_cost": 0.4,
+      "total_cost": 8.0,
+      "prevalence": 0.6,
+      "tp": 12.0,
+      "tn": 0.0,
+      "fp": 8.0,
+      "fn": 0.0,
+      "threshold": 0.0,
+      "youden_j": -8.337774914934926e-14
+    },
+    "best_expected_cost": {
+      "auc": 0.4375,
+      "pr_auc": 0.5727272727272728,
+      "accuracy": 0.6,
+      "balanced_accuracy": 0.4999999999999583,
+      "precision": 0.6,
+      "recall": 1.0,
+      "sensitivity": 0.9999999999999166,
+      "specificity": 0.0,
+      "f1": 0.75,
+      "brier_score": 0.3326704545454546,
+      "ece": 0.2875,
+      "log_loss": 0.8755171736430427,
+      "false_positive_rate": 0.999999999999875,
+      "false_negative_rate": 0.0,
+      "expected_cost": 0.4,
+      "total_cost": 8.0,
+      "prevalence": 0.6,
+      "tp": 12.0,
+      "tn": 0.0,
+      "fp": 8.0,
+      "fn": 0.0,
+      "threshold": 0.0,
+      "youden_j": -8.337774914934926e-14
+    },
+    "target_specificity": {
+      "auc": 0.4375,
+      "pr_auc": 0.5727272727272728,
+      "accuracy": 0.45,
+      "balanced_accuracy": 0.4374999999999557,
+      "precision": 0.5454545454545454,
+      "recall": 0.5,
+      "sensitivity": 0.4999999999999583,
+      "specificity": 0.37499999999995315,
+      "f1": 0.5217391304347826,
+      "brier_score": 0.3326704545454546,
+      "ece": 0.2875,
+      "log_loss": 0.8755171736430427,
+      "false_positive_rate": 0.6249999999999218,
+      "false_negative_rate": 0.4999999999999583,
+      "expected_cost": 1.75,
+      "total_cost": 35.0,
+      "prevalence": 0.6,
+      "tp": 6.0,
+      "tn": 3.0,
+      "fp": 5.0,
+      "fn": 6.0,
+      "threshold": 0.3,
+      "youden_j": -0.1250000000000886
+    },
+    "target_recall": null
+  },
+  "cost_config": {
+    "fp_cost": 1.0,
+    "fn_cost": 5.0
+  },
+  "artifacts": {
+    "round_metrics_csv": "results/metrics/fedavg_non_iid_smoke_round_metrics.csv",
+    "validation": {
+      "predictions_csv": "results/metrics/fedavg_non_iid_smoke_val_predictions.csv",
+      "calibration_csv": "results/metrics/fedavg_non_iid_smoke_val_calibration_comparison.csv",
+      "raw_threshold_sweep_csv": "results/metrics/fedavg_non_iid_smoke_val_threshold_sweep_raw.csv",
+      "selected_threshold_sweep_csv": "results/metrics/fedavg_non_iid_smoke_val_threshold_sweep_selected.csv",
+      "analysis_json": "results/metrics/fedavg_non_iid_smoke_val_analysis.json"
+    },
+    "test": {
+      "predictions_csv": "results/metrics/fedavg_non_iid_smoke_test_predictions.csv",
+      "calibration_csv": "results/metrics/fedavg_non_iid_smoke_test_calibration_comparison.csv",
+      "raw_threshold_sweep_csv": "results/metrics/fedavg_non_iid_smoke_test_threshold_sweep_raw.csv",
+      "selected_threshold_sweep_csv": "results/metrics/fedavg_non_iid_smoke_test_threshold_sweep_selected.csv",
+      "analysis_json": "results/metrics/fedavg_non_iid_smoke_test_analysis.json"
+    }
+  },
+  "history": {
+    "losses_distributed": [
+      [
+        1,
+        0.7003821940983043
+      ]
+    ],
+    "metrics_distributed": {
+      "sensitivity": [
+        [
+          1,
+          0.17647058823524836
+        ]
+      ],
+      "threshold": [
+        [
+          1,
+          0.5
+        ]
+      ],
+      "total_cost": [
+        [
+          1,
+          16.176470588235293
+        ]
+      ],
+      "false_negative_rate": [
+        [
+          1,
+          0.8235294117643398
+        ]
+      ],
+      "tp": [
+        [
+          1,
+          0.7647058823529411
+        ]
+      ],
+      "recall": [
+        [
+          1,
+          0.17647058823529413
+        ]
+      ],
+      "brier_score": [
+        [
+          1,
+          0.253496742804073
+        ]
+      ],
+      "f1": [
+        [
+          1,
+          0.25210084033613445
+        ]
+      ],
+      "pr_auc": [
+        [
+          1,
+          0.7086367880485528
+        ]
+      ],
+      "false_positive_rate": [
+        [
+          1,
+          0.14705882352933822
+        ]
+      ],
+      "fn": [
+        [
+          1,
+          3.176470588235294
+        ]
+      ],
+      "fp": [
+        [
+          1,
+          0.29411764705882354
+        ]
+      ],
+      "auc": [
+        [
+          1,
+          0.4705882352941176
+        ]
+      ],
+      "balanced_accuracy": [
+        [
+          1,
+          0.5147058823527246
+        ]
+      ],
+      "accuracy": [
+        [
+          1,
+          0.47058823529411764
+        ]
+      ],
+      "expected_cost": [
+        [
+          1,
+          2.411764705882353
+        ]
+      ],
+      "tn": [
+        [
+          1,
+          1.9411764705882353
+        ]
+      ],
+      "specificity": [
+        [
+          1,
+          0.8529411764702008
+        ]
+      ],
+      "precision": [
+        [
+          1,
+          0.6176470588235294
+        ]
+      ],
+      "ece": [
+        [
+          1,
+          0.21273428376983194
+        ]
+      ],
+      "prevalence": [
+        [
+          1,
+          0.5882352941176471
+        ]
+      ],
+      "log_loss": [
+        [
+          1,
+          0.7003821982610754
+        ]
+      ]
+    },
+    "losses_centralized": [
+      [
+        0,
+        0.7051109790802002
+      ],
+      [
+        1,
+        0.7403536438941956
+      ]
+    ],
+    "metrics_centralized": {
+      "auc": [
+        [
+          0,
+          0.3125
+        ],
+        [
+          1,
+          0.4375
+        ]
+      ],
+      "pr_auc": [
+        [
+          0,
+          0.6
+        ],
+        [
+          1,
+          0.5727272727272728
+        ]
+      ],
+      "accuracy": [
+        [
+          0,
+          0.25
+        ],
+        [
+          1,
+          0.45
+        ]
+      ],
+      "balanced_accuracy": [
+        [
+          0,
+          0.3124999999999609
+        ],
+        [
+          1,
+          0.4374999999999557
+        ]
+      ],
+      "precision": [
+        [
+          0,
+          0.0
+        ],
+        [
+          1,
+          0.5454545454545454
+        ]
+      ],
+      "recall": [
+        [
+          0,
+          0.0
+        ],
+        [
+          1,
+          0.5
+        ]
+      ],
+      "sensitivity": [
+        [
+          0,
+          0.0
+        ],
+        [
+          1,
+          0.4999999999999583
+        ]
+      ],
+      "specificity": [
+        [
+          0,
+          0.6249999999999218
+        ],
+        [
+          1,
+          0.37499999999995315
+        ]
+      ],
+      "f1": [
+        [
+          0,
+          0.0
+        ],
+        [
+          1,
+          0.5217391304347826
+        ]
+      ],
+      "brier_score": [
+        [
+          0,
+          0.31985294117647056
+        ],
+        [
+          1,
+          0.3326704545454546
+        ]
+      ],
+      "ece": [
+        [
+          0,
+          0.375
+        ],
+        [
+          1,
+          0.2875
+        ]
+      ],
+      "log_loss": [
+        [
+          0,
+          0.8376739197953498
+        ],
+        [
+          1,
+          0.8755171736430427
+        ]
+      ],
+      "false_positive_rate": [
+        [
+          0,
+          0.37499999999995315
+        ],
+        [
+          1,
+          0.6249999999999218
+        ]
+      ],
+      "false_negative_rate": [
+        [
+          0,
+          0.9999999999999166
+        ],
+        [
+          1,
+          0.4999999999999583
+        ]
+      ],
+      "expected_cost": [
+        [
+          0,
+          3.15
+        ],
+        [
+          1,
+          1.75
+        ]
+      ],
+      "total_cost": [
+        [
+          0,
+          63.0
+        ],
+        [
+          1,
+          35.0
+        ]
+      ],
+      "prevalence": [
+        [
+          0,
+          0.6
+        ],
+        [
+          1,
+          0.6
+        ]
+      ],
+      "tp": [
+        [
+          0,
+          0.0
+        ],
+        [
+          1,
+          6.0
+        ]
+      ],
+      "tn": [
+        [
+          0,
+          5.0
+        ],
+        [
+          1,
+          3.0
+        ]
+      ],
+      "fp": [
+        [
+          0,
+          3.0
+        ],
+        [
+          1,
+          5.0
+        ]
+      ],
+      "fn": [
+        [
+          0,
+          12.0
+        ],
+        [
+          1,
+          6.0
+        ]
+      ],
+      "threshold": [
+        [
+          0,
+          0.4
+        ],
+        [
+          1,
+          0.3
+        ]
+      ]
+    }
+  }
+}

@@ -1,0 +1,54 @@
+experiment_name: fedavg_non_iid
+seed: 42
+method: fedavg
+use_fake_data: false
+data_dir: data/processed/chest_xray
+image_size: 224
+train_size: 900
+val_size: 200
+test_size: 200
+partition_strategy: noniid
+partition_alpha: 0.5
+num_clients: 3
+clinic_names:
+- Sunrise Medical Center
+- Riverside Community Hospital
+- MetroCare Clinic
+rounds: 3
+local_epochs: 1
+batch_size: 16
+num_workers: 0
+lr: 0.001
+weight_decay: 0.0001
+use_class_weights: true
+sampling_strategy: none
+loss_name: focal
+focal_gamma: 2.0
+focal_alpha: null
+threshold_tuning: true
+selection_metric: balanced_accuracy
+threshold_metric: balanced_accuracy
+threshold_strategy: target_specificity
+threshold_min: 0.0
+threshold_max: 1.0
+threshold_step: 0.01
+min_specificity: 0.4
+target_specificity: 0.4
+target_recall: null
+calibration_methods:
+- none
+- temperature
+- platt
+- isotonic
+calibration_selection_metric: ece
+calibration_bins: 15
+fp_cost: 1.0
+fn_cost: 5.0
+fraction_fit: 1.0
+fraction_evaluate: 1.0
+client_val_fraction: 0.2
+prox_mu: 0.0
+model_name: resnet18
+num_classes: 2
+device: cpu
+output_root: results

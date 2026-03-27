@@ -1,0 +1,57 @@
+{
+  "experiment": "fedavg_non_iid_smoke",
+  "seed": 42,
+  "summary": [
+    {
+      "split": "train",
+      "num_samples": 90.0,
+      "normal_count": 42.0,
+      "pneumonia_count": 48.0,
+      "normal_ratio": 0.4666666666666667,
+      "pneumonia_ratio": 0.5333333333333333
+    },
+    {
+      "split": "val",
+      "num_samples": 20.0,
+      "normal_count": 13.0,
+      "pneumonia_count": 7.0,
+      "normal_ratio": 0.65,
+      "pneumonia_ratio": 0.35
+    },
+    {
+      "split": "test",
+      "num_samples": 20.0,
+      "normal_count": 8.0,
+      "pneumonia_count": 12.0,
+      "normal_ratio": 0.4,
+      "pneumonia_ratio": 0.6
+    }
+  ],
+  "clinic_summary_csv": "results/metrics/fedavg_non_iid_smoke_data_audit_clinic_summary.csv",
+  "clinic_summary": [
+    {
+      "clinic_id": 0,
+      "clinic_name": "Sunrise Medical Center",
+      "num_samples": 21,
+      "normal_count": 19,
+      "pneumonia_count": 2,
+      "pneumonia_ratio": 0.09523809523809523
+    },
+    {
+      "clinic_id": 1,
+      "clinic_name": "Riverside Community Hospital",
+      "num_samples": 29,
+      "normal_count": 12,
+      "pneumonia_count": 17,
+      "pneumonia_ratio": 0.5862068965517241
+    },
+    {
+      "clinic_id": 2,
+      "clinic_name": "MetroCare Clinic",
+      "num_samples": 40,
+      "normal_count": 11,
+      "pneumonia_count": 29,
+      "pneumonia_ratio": 0.725
+    }
+  ]
+}

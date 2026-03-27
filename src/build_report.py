@@ -80,11 +80,20 @@ def _clinic_markdown(metrics_dir: Path) -> str:
 def _plot_lines(project_root: Path) -> str:
     plot_candidates = [
         "results/plots/centralized_baseline_auc_by_epoch.png",
+        "results/plots/centralized_baseline_test_confusion_selected.png",
+        "results/plots/centralized_baseline_test_threshold_metrics_selected.png",
+        "results/plots/centralized_baseline_test_reliability_selected.png",
         "results/plots/fedavg_non_iid_clinic_distribution.png",
+        "results/plots/fedavg_non_iid_test_confusion_selected.png",
+        "results/plots/fedavg_non_iid_test_threshold_metrics_selected.png",
+        "results/plots/fedavg_non_iid_test_reliability_selected.png",
         "results/plots/fedavg_non_iid_smoke_clinic_distribution.png",
         "results/plots/fedavg_non_iid_auc_by_round.png",
         "results/plots/fedavg_non_iid_smoke_auc_by_round.png",
         "results/plots/fedprox_non_iid_auc_by_round.png",
+        "results/plots/fedprox_non_iid_test_confusion_selected.png",
+        "results/plots/fedprox_non_iid_test_threshold_metrics_selected.png",
+        "results/plots/fedprox_non_iid_test_reliability_selected.png",
         "results/plots/fedprox_non_iid_smoke_auc_by_round.png",
     ]
     lines = []
@@ -159,12 +168,19 @@ Project story: **3 clinics train one shared model while raw patient images never
 
 ### 4.3 Centralized Test Snapshot
 - Test AUC: {_fmt(_get_metric(c_test, "auc"))}
+- Test PR-AUC: {_fmt(_get_metric(c_test, "pr_auc"))}
+- Test Precision: {_fmt(_get_metric(c_test, "precision"))}
 - Test F1: {_fmt(_get_metric(c_test, "f1"))}
 - Test Sensitivity: {_fmt(c_sens)}
 - Test Specificity: {_fmt(c_spec)}
 - Test Balanced Accuracy: {_fmt(c_bal_acc)}
 - Test Accuracy: {_fmt(_get_metric(c_test, "accuracy"))}
+- Test ECE: {_fmt(_get_metric(c_test, "ece"))}
+- Test Brier Score: {_fmt(_get_metric(c_test, "brier_score"))}
+- Test Expected Cost: {_fmt(_get_metric(c_test, "expected_cost"))}
 - Selected Threshold: {_fmt(c_threshold)}
+- Selected Calibration: `{c_summary.get("selected_calibration_method", "n/a")}`
+- Threshold Strategy: `{c_summary.get("selected_threshold_strategy", "n/a")}`
 - Confusion (TP/TN/FP/FN): `{c_test.get("tp")} / {c_test.get("tn")} / {c_test.get("fp")} / {c_test.get("fn")}`
 
 ### 4.4 Plots

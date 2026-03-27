@@ -6,7 +6,6 @@ from time import perf_counter
 from typing import Dict, List
 
 import flwr as fl
-import numpy as np
 import pandas as pd
 import torch
 from torch import nn
@@ -18,10 +17,18 @@ from .dataset import (
     get_clinic_names,
     load_datasets,
     split_client_train_val,
+    summarize_dataset,
 )
-from .evaluate import collect_predictions, evaluate_from_predictions, tune_threshold
+from .evaluate import collect_predictions
 from .fl_client import FedMedClient
 from .model import build_model
+from .research_utils import (
+    build_decision_bundle,
+    build_transfer_decision_bundle,
+    save_config_snapshot,
+    save_split_analysis,
+    selection_score,
+)
 from .strategies import build_strategy
 from .utils import (
     make_output_paths,
@@ -44,15 +51,27 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     cfg = load_cfg(args.config)
-    set_seed(int(cfg.get("seed", 42)))
+    seed = int(cfg.get("seed", 42))
+    set_seed(seed)
 
     paths = make_output_paths(cfg.get("output_root", "results"))
-    exp_name = cfg.get("experiment_name", cfg.get("method", "federated"))
+    exp_name = str(cfg.get("experiment_name", cfg.get("method", "federated")))
+    config_snapshot = save_config_snapshot(cfg, exp_name, paths)
 
     train_ds, val_ds, test_ds, train_labels = load_datasets(cfg)
     partitions = create_or_load_partitions(labels=train_labels, cfg=cfg)
     clinic_names = get_clinic_names(cfg, int(cfg["num_clients"]))
     clinic_df = build_clinic_summary(partitions=partitions, labels=train_labels, clinic_names=clinic_names)
+
+    dataset_summary_df = pd.DataFrame(
+        [
+            summarize_dataset(train_ds, "train"),
+            summarize_dataset(val_ds, "val"),
+            summarize_dataset(test_ds, "test"),
+        ]
+    )
+    dataset_summary_csv = paths.metrics_dir / f"{exp_name}_dataset_summary.csv"
+    save_dataframe(dataset_summary_df, dataset_summary_csv)
 
     device = torch.device(cfg.get("device", "cpu"))
     criterion = nn.CrossEntropyLoss()
@@ -74,15 +93,18 @@ def main() -> None:
     best_auc = float("-inf")
     best_selection_score = float("-inf")
     best_threshold = 0.5
-    min_specificity_cfg = cfg.get("min_specificity")
-    min_specificity = float(min_specificity_cfg) if min_specificity_cfg is not None else None
+    best_round = 0
+    best_val_bundle: Dict | None = None
+    selection_metric = str(cfg.get("selection_metric", "balanced_accuracy"))
     loss_name = str(cfg.get("loss_name", "cross_entropy"))
     focal_gamma = float(cfg.get("focal_gamma", 2.0))
+    sampling_strategy = str(cfg.get("sampling_strategy", "none"))
     best_ckpt = paths.checkpoints_dir / f"{exp_name}_best.pt"
     clinic_csv = paths.metrics_dir / f"{exp_name}_clinic_summary.csv"
     clinic_plot = paths.plots_dir / f"{exp_name}_clinic_distribution.png"
     save_dataframe(clinic_df, clinic_csv)
     plot_clinic_distribution(clinic_df, clinic_plot, title=f"{exp_name}: Data Split Across Clinics")
+
     print("\n[CLINICS]")
     for row in clinic_df.itertuples(index=False):
         print(
@@ -90,8 +112,7 @@ def main() -> None:
             f"NORMAL={row.normal_count}, PNEUMONIA={row.pneumonia_count}"
         )
     print(f"Train loss: {loss_name} (focal_gamma={focal_gamma:.2f})")
-    if min_specificity is not None:
-        print(f"Clinical threshold target: specificity >= {min_specificity:.2f}")
+    print(f"Sampling strategy: {sampling_strategy}")
 
     def client_fn(cid: str):
         cid_key = str(cid)
@@ -99,7 +120,7 @@ def main() -> None:
         train_idx, val_idx = split_client_train_val(
             indices,
             val_fraction=float(cfg.get("client_val_fraction", 0.2)),
-            seed=int(cfg.get("seed", 42)) + int(cid_key),
+            seed=seed + int(cid_key),
         )
 
         client_train = Subset(train_ds, train_idx)
@@ -120,55 +141,65 @@ def main() -> None:
         }
 
     def evaluate_fn(server_round: int, parameters, _config):
-        nonlocal best_auc, best_selection_score, best_threshold
-        threshold_tuning = bool(cfg.get("threshold_tuning", True))
-        threshold_metric = str(cfg.get("threshold_metric", "balanced_accuracy"))
-        selection_metric = str(cfg.get("selection_metric", "balanced_accuracy"))
+        nonlocal best_auc, best_selection_score, best_threshold, best_round, best_val_bundle
 
         model = build_model(cfg.get("model_name", "resnet18"), int(cfg.get("num_classes", 2))).to(device)
         set_model_parameters(model, parameters)
 
-        val_loss, y_val, p_val = collect_predictions(model, val_loader, device=device, criterion=criterion)
-        if threshold_tuning:
-            threshold = tune_threshold(
-                y_true=y_val,
-                y_prob=p_val,
-                metric=threshold_metric,
-                threshold_min=float(cfg.get("threshold_min", 0.1)),
-                threshold_max=float(cfg.get("threshold_max", 0.9)),
-                threshold_step=float(cfg.get("threshold_step", 0.02)),
-                min_specificity=min_specificity,
-                default_threshold=0.5,
-            )
-        else:
-            threshold = 0.5
+        val_outputs = collect_predictions(model, val_loader, device=device, criterion=criterion)
+        val_bundle = build_decision_bundle(outputs=val_outputs, cfg=cfg)
 
-        val_metrics = evaluate_from_predictions(y_true=y_val, y_prob=p_val, threshold=threshold)
+        test_outputs = collect_predictions(model, test_loader, device=device, criterion=criterion)
+        test_bundle = build_transfer_decision_bundle(
+            outputs=test_outputs,
+            cfg=cfg,
+            reference_bundle=val_bundle,
+        )
 
-        loss, y_test, p_test = collect_predictions(model, test_loader, device=device, criterion=criterion)
-        metrics = evaluate_from_predictions(y_true=y_test, y_prob=p_test, threshold=threshold)
+        val_selected = val_bundle["reports"]["selected"]["metrics"]
+        test_selected = test_bundle["reports"]["selected"]["metrics"]
+
         row = {
-            "round": server_round,
-            "loss": loss,
-            "val_loss": val_loss,
-            "val_auc": float(val_metrics.get("auc", float("nan"))),
-            "val_balanced_accuracy": float(val_metrics.get("balanced_accuracy", float("nan"))),
-            "val_specificity": float(val_metrics.get("specificity", float("nan"))),
-            **metrics,
+            "round": float(server_round),
+            "loss": float(test_outputs.loss),
+            "val_loss": float(val_outputs.loss),
+            "threshold": float(val_bundle["selected_threshold"]),
+            "selected_calibration_method": str(val_bundle["selected_calibration_method"]),
+            "selection_score": float(selection_score(val_bundle, selection_metric)),
+            "val_auc": float(val_selected.get("auc", float("nan"))),
+            "val_pr_auc": float(val_selected.get("pr_auc", float("nan"))),
+            "val_balanced_accuracy": float(val_selected.get("balanced_accuracy", float("nan"))),
+            "val_specificity": float(val_selected.get("specificity", float("nan"))),
+            "val_recall": float(val_selected.get("recall", float("nan"))),
+            "val_ece": float(val_selected.get("ece", float("nan"))),
+            "auc": float(test_selected.get("auc", float("nan"))),
+            "pr_auc": float(test_selected.get("pr_auc", float("nan"))),
+            "accuracy": float(test_selected.get("accuracy", float("nan"))),
+            "balanced_accuracy": float(test_selected.get("balanced_accuracy", float("nan"))),
+            "precision": float(test_selected.get("precision", float("nan"))),
+            "recall": float(test_selected.get("recall", float("nan"))),
+            "specificity": float(test_selected.get("specificity", float("nan"))),
+            "f1": float(test_selected.get("f1", float("nan"))),
+            "ece": float(test_selected.get("ece", float("nan"))),
+            "brier_score": float(test_selected.get("brier_score", float("nan"))),
+            "expected_cost": float(test_selected.get("expected_cost", float("nan"))),
+            "tp": float(test_selected.get("tp", float("nan"))),
+            "tn": float(test_selected.get("tn", float("nan"))),
+            "fp": float(test_selected.get("fp", float("nan"))),
+            "fn": float(test_selected.get("fn", float("nan"))),
         }
         round_metrics.append(row)
 
-        score = float(val_metrics.get(selection_metric, float("nan")))
-        if math.isnan(score):
-            score = float(val_metrics.get("auc", float("nan")))
-
+        score = float(selection_score(val_bundle, selection_metric))
         if not math.isnan(score) and score > best_selection_score:
             best_selection_score = score
-            best_threshold = float(threshold)
-            best_auc = float(metrics.get("auc", float("nan")))
+            best_threshold = float(val_bundle["selected_threshold"])
+            best_auc = float(test_selected.get("auc", float("nan")))
+            best_round = server_round
+            best_val_bundle = val_bundle
             torch.save(model.state_dict(), best_ckpt)
 
-        return float(loss), metrics
+        return float(test_outputs.loss), test_selected
 
     strategy = build_strategy(cfg=cfg, evaluate_fn=evaluate_fn, fit_config_fn=fit_config_fn)
 
@@ -185,6 +216,73 @@ def main() -> None:
     )
     elapsed = perf_counter() - start
 
+    if not best_ckpt.exists():
+        raise FileNotFoundError(f"Best checkpoint was not saved for {exp_name}.")
+
+    best_model = build_model(cfg.get("model_name", "resnet18"), int(cfg.get("num_classes", 2))).to(device)
+    best_model.load_state_dict(torch.load(best_ckpt, map_location=device))
+
+    if best_val_bundle is None:
+        val_outputs = collect_predictions(best_model, val_loader, device=device, criterion=criterion)
+        best_val_bundle = build_decision_bundle(outputs=val_outputs, cfg=cfg)
+
+    test_outputs = collect_predictions(best_model, test_loader, device=device, criterion=criterion)
+    test_bundle = build_transfer_decision_bundle(
+        outputs=test_outputs,
+        cfg=cfg,
+        reference_bundle=best_val_bundle,
+    )
+
+    per_clinic_rows: List[Dict[str, float | str]] = []
+    for cid, clinic_name in enumerate(clinic_names):
+        indices = partitions[str(cid)]
+        _, val_idx = split_client_train_val(
+            indices,
+            val_fraction=float(cfg.get("client_val_fraction", 0.2)),
+            seed=seed + cid,
+        )
+        clinic_val = Subset(train_ds, val_idx)
+        clinic_loader = DataLoader(
+            clinic_val,
+            batch_size=int(cfg.get("batch_size", 16)),
+            shuffle=False,
+            num_workers=int(cfg.get("num_workers", 0)),
+        )
+        clinic_outputs = collect_predictions(best_model, clinic_loader, device=device, criterion=criterion)
+        clinic_bundle = build_transfer_decision_bundle(
+            outputs=clinic_outputs,
+            cfg=cfg,
+            reference_bundle=best_val_bundle,
+        )
+        clinic_summary = summarize_dataset(clinic_val, f"{clinic_name}_val")
+        clinic_metrics = clinic_bundle["reports"]["selected"]["metrics"]
+        per_clinic_rows.append(
+            {
+                "clinic_id": float(cid),
+                "clinic_name": clinic_name,
+                **clinic_summary,
+                "auc": float(clinic_metrics.get("auc", float("nan"))),
+                "pr_auc": float(clinic_metrics.get("pr_auc", float("nan"))),
+                "accuracy": float(clinic_metrics.get("accuracy", float("nan"))),
+                "balanced_accuracy": float(clinic_metrics.get("balanced_accuracy", float("nan"))),
+                "precision": float(clinic_metrics.get("precision", float("nan"))),
+                "recall": float(clinic_metrics.get("recall", float("nan"))),
+                "specificity": float(clinic_metrics.get("specificity", float("nan"))),
+                "f1": float(clinic_metrics.get("f1", float("nan"))),
+                "ece": float(clinic_metrics.get("ece", float("nan"))),
+                "expected_cost": float(clinic_metrics.get("expected_cost", float("nan"))),
+                "threshold": float(clinic_bundle["selected_threshold"]),
+                "calibration_method": str(clinic_bundle["selected_calibration_method"]),
+            }
+        )
+
+    per_clinic_df = pd.DataFrame(per_clinic_rows)
+    per_clinic_csv = paths.metrics_dir / f"{exp_name}_per_clinic_metrics.csv"
+    save_dataframe(per_clinic_df, per_clinic_csv)
+
+    val_artifacts = save_split_analysis(exp_name=exp_name, split_name="val", decision_bundle=best_val_bundle, paths=paths)
+    test_artifacts = save_split_analysis(exp_name=exp_name, split_name="test", decision_bundle=test_bundle, paths=paths)
+
     metrics_df = pd.DataFrame(round_metrics)
     metrics_path = paths.metrics_dir / f"{exp_name}_round_metrics.csv"
     save_dataframe(metrics_df, metrics_path)
@@ -193,22 +291,43 @@ def main() -> None:
         "experiment": exp_name,
         "method": cfg.get("method", "fedavg"),
         "num_clients": num_clients,
+        "rounds": rounds,
+        "local_epochs": int(cfg.get("local_epochs", 1)),
+        "lr": float(cfg.get("lr", 1e-3)),
+        "prox_mu": float(cfg.get("prox_mu", 0.0)),
+        "best_round": best_round,
         "use_class_weights": bool(cfg.get("use_class_weights", True)),
+        "sampling_strategy": sampling_strategy,
         "loss_name": loss_name,
         "focal_gamma": focal_gamma,
-        "threshold_tuning": bool(cfg.get("threshold_tuning", True)),
-        "selection_metric": str(cfg.get("selection_metric", "balanced_accuracy")),
-        "threshold_metric": str(cfg.get("threshold_metric", "balanced_accuracy")),
-        "min_specificity": min_specificity,
+        "selection_metric": selection_metric,
         "best_selection_score": float(best_selection_score),
         "best_threshold": float(best_threshold),
+        "selected_threshold_strategy": str(best_val_bundle["selected_threshold_strategy"]),
+        "selected_calibration_method": str(best_val_bundle["selected_calibration_method"]),
+        "calibration_selection_metric": str(best_val_bundle["calibration_selection_metric"]),
         "clinic_names": clinic_names,
         "clinic_summary_csv": str(clinic_csv),
         "clinic_distribution_plot": str(clinic_plot),
-        "rounds": rounds,
+        "dataset_summary_csv": str(dataset_summary_csv),
+        "per_clinic_metrics_csv": str(per_clinic_csv),
+        "config_snapshot": str(config_snapshot),
         "elapsed_seconds": elapsed,
         "best_auc": float(best_auc),
         "best_checkpoint": str(best_ckpt),
+        "validation_metrics_selected": best_val_bundle["reports"]["selected"]["metrics"],
+        "validation_metrics_threshold_0_5": best_val_bundle["reports"]["raw_threshold_0_5"]["metrics"],
+        "test_metrics": test_bundle["reports"]["selected"]["metrics"],
+        "test_metrics_threshold_0_5": test_bundle["reports"]["raw_threshold_0_5"]["metrics"],
+        "test_metrics_calibrated_threshold_0_5": test_bundle["reports"]["selected_calibration_threshold_0_5"]["metrics"],
+        "threshold_summary_validation": best_val_bundle["selected_threshold_summary"],
+        "threshold_summary_test": test_bundle["selected_threshold_summary"],
+        "cost_config": best_val_bundle["cost_config"],
+        "artifacts": {
+            "round_metrics_csv": str(metrics_path),
+            "validation": val_artifacts,
+            "test": test_artifacts,
+        },
         "history": {
             "losses_distributed": getattr(history, "losses_distributed", []),
             "metrics_distributed": getattr(history, "metrics_distributed", {}),
@@ -233,6 +352,9 @@ def main() -> None:
     print(f"Metrics: {metrics_path}")
     print(f"Summary: {summary_path}")
     print(f"Best checkpoint: {best_ckpt}")
+    print(f"Best round: {best_round}")
+    print(f"Best threshold: {best_threshold:.2f}")
+    print(f"Selected calibration: {best_val_bundle['selected_calibration_method']}")
     print(f"Elapsed: {elapsed:.2f}s")
 
 

@@ -7,7 +7,7 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
-from .dataset import compute_class_weights
+from .dataset import build_training_dataloader, compute_class_weights
 from .evaluate import evaluate_model
 from .losses import build_train_criterion
 from .model import build_model
@@ -33,12 +33,16 @@ class FedMedClient(fl.client.NumPyClient):
 
         batch_size = int(cfg.get("batch_size", 16))
         num_workers = int(cfg.get("num_workers", 0))
+        num_classes = int(cfg.get("num_classes", 2))
+        sampling_strategy = str(cfg.get("sampling_strategy", "none"))
 
-        self.train_loader = DataLoader(
-            train_dataset,
+        self.train_loader = build_training_dataloader(
+            dataset=train_dataset,
             batch_size=batch_size,
-            shuffle=True,
             num_workers=num_workers,
+            sampling_strategy=sampling_strategy,
+            seed=int(cfg.get("seed", 42)) + int(cid),
+            num_classes=num_classes,
         )
         self.val_loader = DataLoader(
             val_dataset,
@@ -50,15 +54,16 @@ class FedMedClient(fl.client.NumPyClient):
         use_class_weights = bool(cfg.get("use_class_weights", True))
         loss_name = str(cfg.get("loss_name", "cross_entropy"))
         focal_gamma = float(cfg.get("focal_gamma", 2.0))
+        focal_alpha = cfg.get("focal_alpha")
         class_weights = None
         if use_class_weights:
-            class_weights = compute_class_weights(train_dataset, num_classes=int(cfg.get("num_classes", 2))).to(
-                self.device
-            )
+            class_weights = compute_class_weights(train_dataset, num_classes=num_classes).to(self.device)
         self.criterion = build_train_criterion(
             loss_name=loss_name,
             class_weights=class_weights,
             focal_gamma=focal_gamma,
+            focal_alpha=focal_alpha,
+            num_classes=num_classes,
         )
         self.eval_criterion = nn.CrossEntropyLoss()
 

@@ -25,15 +25,29 @@ num_workers: 0
 lr: 0.001
 weight_decay: 0.0001
 use_class_weights: true
+sampling_strategy: none
 loss_name: focal
 focal_gamma: 2.0
+focal_alpha:
 threshold_tuning: true
 selection_metric: balanced_accuracy
 threshold_metric: balanced_accuracy
-threshold_min: 0.1
-threshold_max: 0.9
-threshold_step: 0.02
+threshold_strategy: target_specificity
+threshold_min: 0.0
+threshold_max: 1.0
+threshold_step: 0.01
 min_specificity: 0.4
+target_specificity: 0.4
+target_recall:
+calibration_methods:
+  - none
+  - temperature
+  - platt
+  - isotonic
+calibration_selection_metric: ece
+calibration_bins: 15
+fp_cost: 1.0
+fn_cost: 5.0
 fraction_fit: 1.0
 fraction_evaluate: 1.0
 client_val_fraction: 0.2

@@ -1,151 +1,160 @@
-# Federated Learning for Medical Imaging
+Federated Learning for Medical Imaging
 
-Three virtual clinics train a shared chest X-ray model while raw patient images never leave each clinic.
+Decision Reliability for Medical AI
+Reducing false positives in chest X-ray classification (Centralized vs Federated Learning)
 
-This project compares:
-- Centralized training
-- Federated training (FedAvg)
-- Federated training (FedProx)
+Key Result
 
-Default clinic setup (3 virtual hospitals):
-- Sunrise Medical Center
-- Riverside Community Hospital
-- MetroCare Clinic
+We improved model specificity from ~0.32 to ~0.84 using calibration and threshold tuning — without changing the model architecture.
 
-## Product Outcome
+This shows that medical AI failure is often a decision problem, not a model problem.
 
-- End-to-end runnable pipeline
-- Reproducible configs and scripts
-- Saved metrics/plots/checkpoints
-- Calibration update:
-  - class-weighted/focal training for imbalance
-  - validation threshold tuning with optional specificity target
-- Final comparison table (`centralized vs fedavg vs fedprox`)
-- Auto-generated technical report
+⸻
 
-See [CHANGELOG.md](CHANGELOG.md) for recent updates.
+Before vs After (Centralized)
 
-## Repository Structure
+Setting | Specificity | Recall | F1
+Default threshold (0.5) | ~0.32 | ~1.00 | ~0.78
+Calibrated + tuned | 0.84 | 0.869 | 0.884
 
-```
-.
-├── configs/
-├── data/
-├── results/
-├── scripts/
-│   ├── prepare_data.sh
-│   ├── run_all.sh
-│   ├── run_centralized.sh
-│   ├── run_fedavg.sh
-│   ├── run_fedprox.sh
-│   ├── run_fedprox_sweep.sh
-│   ├── run_compare.sh
-│   └── run_report.sh
-├── src/
-│   ├── build_report.py
-│   ├── compare_results.py
-│   ├── dataset.py
-│   ├── evaluate.py
-│   ├── fedprox_sweep.py
-│   ├── fl_client.py
-│   ├── fl_server.py
-│   ├── losses.py
-│   ├── model.py
-│   ├── strategies.py
-│   ├── train_centralized.py
-│   └── utils.py
-├── REPORT.md
-└── requirements.txt
-```
+⸻
 
-## Dataset Layout
+Problem
 
-Use chest X-ray data in this format:
+Medical AI models are typically evaluated using ranking metrics like AUC. However, high AUC does not guarantee clinically usable decisions.
 
-```
-data/processed/chest_xray/
-├── train/
-│   ├── NORMAL/
-│   └── PNEUMONIA/
-├── val/
-│   ├── NORMAL/
-│   └── PNEUMONIA/
-└── test/
-    ├── NORMAL/
-    └── PNEUMONIA/
-```
+In practice:
+    •    models generate too many false positives
+    •    threshold choice drastically changes behavior
+    •    calibration is often ignored
 
-Set in configs:
-- `use_fake_data: false`
-- `data_dir: data/processed/chest_xray`
+This becomes worse in federated learning, where:
+    •    data is non-IID
+    •    class imbalance is severe
+    •    global behavior becomes unstable
 
-## Quick Start
+⸻
 
-```bash
-python3.11 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
+Project Focus
 
-Recommended Python version: `3.11` (Flower/protobuf stack can fail on `3.14`).
+This project studies decision reliability, not just model training.
 
-## Run Experiments
+We analyze:
+    •    thresholding
+    •    calibration
+    •    class imbalance
+    •    non-IID data effects
 
-### Full product run
+Across:
+    •    Centralized training
+    •    Federated Learning (FedAvg)
+    •    Federated Learning (FedProx)
 
-```bash
+Use case:
+    •    Chest X-ray classification
+    •    Pneumonia vs Normal
+
+⸻
+
+Refreshed Results (Selected Operating Points)
+
+Centralized
+    •    Threshold: 0.13
+    •    Calibration: isotonic
+    •    Precision: 0.899
+    •    Recall: 0.869
+    •    Specificity: 0.838
+    •    F1: 0.884
+
+FedAvg
+    •    Threshold: 0.01
+    •    Precision: 0.646
+    •    Recall: 0.959
+    •    Specificity: 0.124
+
+FedProx
+    •    Threshold: 0.26
+    •    Precision: 0.721
+    •    Recall: 0.890
+    •    Specificity: 0.427
+
+⸻
+
+Key Insights
+    •    Fixed threshold (0.5) evaluation is misleading
+    •    Calibration + threshold tuning can dramatically improve usability
+    •    FedAvg remains unstable even after calibration
+    •    FedProx is more stable but still inconsistent
+    •    Calibration method selection impacts final results
+
+⸻
+
+What This Project Adds
+    •    Full evaluation pipeline
+    •    Threshold sweeps and tuned operating points
+    •    Cost-aware evaluation
+    •    Calibration methods:
+    •    Temperature scaling
+    •    Platt scaling
+    •    Isotonic regression
+    •    Reliability diagrams
+    •    ROC / PR curves
+    •    Per-clinic federated analysis (non-IID)
+    •    Reproducible experiments and reports
+
+⸻
+
+Pipeline
+
+image → model → probability → calibration → threshold → decision
+
+Focus: probability → decision
+
+⸻
+
+Project Structure
+
+configs/
+data/
+results/
+scripts/
+src/
+REPORT.md
+
+⸻
+
+Run
+
 bash scripts/run_all.sh
-```
 
-### Step-by-step run
+⸻
 
-```bash
-bash scripts/prepare_data.sh
-bash scripts/run_centralized.sh
-bash scripts/run_fedavg.sh
-bash scripts/run_fedprox.sh
-bash scripts/run_compare.sh
-bash scripts/run_report.sh
-```
+Outputs
+    •    metrics: results/metrics/
+    •    plots: results/plots/
+    •    checkpoints: results/checkpoints/
+    •    final comparison: results/metrics/comparison_table.csv
+    •    report: REPORT.md
 
-All run scripts auto-detect `.venv/bin/python` if it exists, so they work even if the venv is not manually activated.
+⸻
 
-### Optional FedProx mu sweep
+Interpretation
+    •    Centralized: mostly threshold/calibration issue
+    •    FedAvg: deeper failure (over-predicts positives)
+    •    FedProx: more stable but still inconsistent
 
-```bash
-bash scripts/run_fedprox_sweep.sh
-```
+⸻
 
-## Outputs
+Next Steps
+    •    imbalance sweep experiments
+    •    federated hyperparameter tuning
+    •    calibration comparison (Platt vs isotonic)
+    •    analysis of FedAvg drift
 
-- Metrics: `results/metrics/*.csv`, `results/metrics/*.json`
-- Plots: `results/plots/*.png`
-- Checkpoints: `results/checkpoints/*.pt`
-- Clinic split summary: `results/metrics/*_clinic_summary.csv`
-- Clinic distribution plot: `results/plots/*_clinic_distribution.png`
-- Final comparison: `results/metrics/comparison_table.csv`
-- Report: `REPORT.md`
+⸻
 
-## Tracked Metrics
+Why This Matters
 
-- AUC
-- F1
-- Sensitivity
-- Specificity
-- Balanced accuracy
-- Accuracy
-- Confusion stats (TP/TN/FP/FN)
-- Selected classification threshold
-- Training time / communication rounds
+Improving decision reliability may be as important as improving model accuracy.
 
-## Clinical Calibration Controls
-
-All are configurable in YAML:
-- `loss_name`: `cross_entropy` or `focal`
-- `focal_gamma`: focusing parameter for focal loss
-- `min_specificity`: optional threshold target during validation-based threshold tuning
-
-## Notes
-
-- Split files are generated with dataset-size-aware names to avoid smoke/full mismatch.
-- Scripts set local matplotlib cache (`.cache/`) for stable runs on macOS sandboxed environments.
+This opens a path toward a general reliability layer for medical AI systems.

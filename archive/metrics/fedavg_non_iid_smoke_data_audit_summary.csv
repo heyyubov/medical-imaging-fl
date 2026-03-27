@@ -1,0 +1,4 @@
+split,num_samples,normal_count,pneumonia_count,normal_ratio,pneumonia_ratio
+train,90.0,42.0,48.0,0.4666666666666667,0.5333333333333333
+val,20.0,13.0,7.0,0.65,0.35
+test,20.0,8.0,12.0,0.4,0.6

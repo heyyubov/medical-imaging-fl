@@ -1,0 +1,4 @@
+clinic_id,clinic_name,split,num_samples,normal_count,pneumonia_count,normal_ratio,pneumonia_ratio,auc,pr_auc,accuracy,balanced_accuracy,precision,recall,specificity,f1,ece,expected_cost,threshold,calibration_method
+0.0,Sunrise Medical Center,Sunrise Medical Center_val,4.0,3.0,1.0,0.75,0.25,0.33333333333333337,0.25,0.5,0.33333333333322224,0.0,0.0,0.6666666666664445,0.0,0.15340909090909088,1.5,0.3,isotonic
+1.0,Riverside Community Hospital,Riverside Community Hospital_val,5.0,2.0,3.0,0.4,0.6,0.8333333333333333,0.8333333333333333,0.8,0.7499999999997082,0.75,1.0,0.49999999999975,0.8571428571428571,0.23181818181838182,0.2,0.3,isotonic
+2.0,MetroCare Clinic,MetroCare Clinic_val,8.0,2.0,6.0,0.25,0.75,0.5833333333333333,0.7833333333333333,0.625,0.5833333333331527,0.8,0.6666666666666666,0.49999999999975,0.7272727272727273,0.42897727272727276,1.375,0.3,isotonic

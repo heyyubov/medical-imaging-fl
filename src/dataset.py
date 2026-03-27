@@ -8,7 +8,7 @@ from typing import Dict, List, Sequence, Tuple
 import numpy as np
 import pandas as pd
 import torch
-from torch.utils.data import DataLoader, Dataset, Subset
+from torch.utils.data import DataLoader, Dataset, Subset, WeightedRandomSampler
 from torchvision import datasets, transforms
 
 from .utils import load_yaml, set_seed
@@ -82,6 +82,72 @@ def load_datasets(cfg: Dict) -> Tuple[Dataset, Dataset, Dataset, List[int]]:
 
 def make_loader(dataset: Dataset, batch_size: int, num_workers: int, shuffle: bool) -> DataLoader:
     return DataLoader(dataset, batch_size=batch_size, num_workers=num_workers, shuffle=shuffle)
+
+
+def build_training_dataloader(
+    dataset: Dataset,
+    batch_size: int,
+    num_workers: int,
+    sampling_strategy: str = "none",
+    seed: int = 42,
+    num_classes: int = 2,
+) -> DataLoader:
+    strategy = str(sampling_strategy).lower()
+
+    if strategy in {"none", "shuffle"}:
+        return DataLoader(dataset, batch_size=batch_size, num_workers=num_workers, shuffle=True)
+
+    targets = np.array(extract_targets(dataset), dtype=np.int64)
+    counts = np.bincount(targets, minlength=num_classes)
+    rng = np.random.default_rng(seed)
+
+    if strategy in {"weighted", "weighted_sampler"}:
+        class_weights = np.zeros(num_classes, dtype=np.float64)
+        nonzero = counts > 0
+        class_weights[nonzero] = 1.0 / counts[nonzero]
+        sample_weights = torch.tensor(class_weights[targets], dtype=torch.double)
+        generator = torch.Generator().manual_seed(seed)
+        sampler = WeightedRandomSampler(
+            weights=sample_weights,
+            num_samples=len(targets),
+            replacement=True,
+            generator=generator,
+        )
+        return DataLoader(dataset, batch_size=batch_size, num_workers=num_workers, sampler=sampler, shuffle=False)
+
+    if strategy == "oversample":
+        max_count = int(counts.max())
+        sampled_indices: List[int] = []
+        for class_id in range(num_classes):
+            class_indices = np.where(targets == class_id)[0]
+            if class_indices.size == 0:
+                continue
+            chosen = rng.choice(class_indices, size=max_count, replace=True)
+            sampled_indices.extend(chosen.tolist())
+        rng.shuffle(sampled_indices)
+        balanced_dataset = Subset(dataset, sampled_indices)
+        return DataLoader(balanced_dataset, batch_size=batch_size, num_workers=num_workers, shuffle=True)
+
+    if strategy == "undersample":
+        positive_counts = counts[counts > 0]
+        if positive_counts.size == 0:
+            return DataLoader(dataset, batch_size=batch_size, num_workers=num_workers, shuffle=True)
+        min_count = int(positive_counts.min())
+        sampled_indices = []
+        for class_id in range(num_classes):
+            class_indices = np.where(targets == class_id)[0]
+            if class_indices.size == 0:
+                continue
+            chosen = rng.choice(class_indices, size=min_count, replace=False)
+            sampled_indices.extend(chosen.tolist())
+        rng.shuffle(sampled_indices)
+        balanced_dataset = Subset(dataset, sampled_indices)
+        return DataLoader(balanced_dataset, batch_size=batch_size, num_workers=num_workers, shuffle=True)
+
+    raise ValueError(
+        "Unsupported sampling_strategy="
+        f"'{sampling_strategy}'. Use one of: none, weighted_sampler, oversample, undersample."
+    )
 
 
 def split_iid(num_samples: int, num_clients: int, seed: int) -> Dict[str, List[int]]:
@@ -234,6 +300,20 @@ def compute_class_weights(dataset: Dataset, num_classes: int = 2) -> torch.Tenso
     if nonzero.any():
         weights[nonzero] = weights[nonzero] / weights[nonzero].mean()
     return torch.tensor(weights, dtype=torch.float32)
+
+
+def summarize_dataset(dataset: Dataset, split_name: str) -> Dict[str, float]:
+    targets = np.array(extract_targets(dataset), dtype=np.int64)
+    counts = np.bincount(targets, minlength=2)
+    total = int(targets.size)
+    return {
+        "split": split_name,
+        "num_samples": float(total),
+        "normal_count": float(counts[0]),
+        "pneumonia_count": float(counts[1]),
+        "normal_ratio": float(counts[0] / total) if total > 0 else float("nan"),
+        "pneumonia_ratio": float(counts[1] / total) if total > 0 else float("nan"),
+    }
 
 
 def create_or_load_partitions(labels: Sequence[int], cfg: Dict) -> Dict[str, List[int]]:

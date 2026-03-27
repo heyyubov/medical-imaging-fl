@@ -6,13 +6,22 @@ from torch import nn
 
 
 class FocalLoss(nn.Module):
-    def __init__(self, gamma: float = 2.0, class_weights: torch.Tensor | None = None) -> None:
+    def __init__(
+        self,
+        gamma: float = 2.0,
+        class_weights: torch.Tensor | None = None,
+        alpha: torch.Tensor | None = None,
+    ) -> None:
         super().__init__()
         self.gamma = float(gamma)
         if class_weights is None:
             self.register_buffer("class_weights", torch.tensor([], dtype=torch.float32))
         else:
             self.register_buffer("class_weights", class_weights.float())
+        if alpha is None:
+            self.register_buffer("alpha", torch.tensor([], dtype=torch.float32))
+        else:
+            self.register_buffer("alpha", alpha.float())
 
     def forward(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
         ce = F.cross_entropy(logits, targets, reduction="none")
@@ -20,20 +29,46 @@ class FocalLoss(nn.Module):
         loss = ((1.0 - pt) ** self.gamma) * ce
 
         if self.class_weights.numel() > 0:
-            alpha = self.class_weights[targets]
-            loss = loss * alpha
+            loss = loss * self.class_weights[targets]
+        if self.alpha.numel() > 0:
+            loss = loss * self.alpha[targets]
 
         return loss.mean()
+
+
+def build_focal_alpha(
+    focal_alpha: float | list[float] | tuple[float, ...] | None,
+    num_classes: int = 2,
+) -> torch.Tensor | None:
+    if focal_alpha is None:
+        return None
+
+    if isinstance(focal_alpha, (list, tuple)):
+        values = [float(x) for x in focal_alpha]
+        if len(values) != num_classes:
+            raise ValueError(f"focal_alpha list must have {num_classes} values, got {len(values)}.")
+        return torch.tensor(values, dtype=torch.float32)
+
+    alpha_pos = float(focal_alpha)
+    if num_classes != 2:
+        raise ValueError("Scalar focal_alpha is only supported for binary classification.")
+    return torch.tensor([1.0 - alpha_pos, alpha_pos], dtype=torch.float32)
 
 
 def build_train_criterion(
     loss_name: str,
     class_weights: torch.Tensor | None = None,
     focal_gamma: float = 2.0,
+    focal_alpha: float | list[float] | tuple[float, ...] | None = None,
+    num_classes: int = 2,
 ) -> nn.Module:
     name = str(loss_name).lower()
     if name in {"ce", "cross_entropy", "crossentropy"}:
         return nn.CrossEntropyLoss(weight=class_weights)
     if name == "focal":
-        return FocalLoss(gamma=focal_gamma, class_weights=class_weights)
+        return FocalLoss(
+            gamma=focal_gamma,
+            class_weights=class_weights,
+            alpha=build_focal_alpha(focal_alpha=focal_alpha, num_classes=num_classes),
+        )
     raise ValueError(f"Unsupported loss_name='{loss_name}'. Use 'cross_entropy' or 'focal'.")

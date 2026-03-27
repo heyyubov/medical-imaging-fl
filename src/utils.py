@@ -70,8 +70,15 @@ def _json_default(obj: Any) -> Any:
 
 
 def save_json(data: Dict[str, Any], path: str | os.PathLike[str]) -> None:
+    ensure_dir(Path(path).parent)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, default=_json_default)
+
+
+def save_yaml(data: Dict[str, Any], path: str | os.PathLike[str]) -> None:
+    ensure_dir(Path(path).parent)
+    with open(path, "w", encoding="utf-8") as f:
+        yaml.safe_dump(data, f, sort_keys=False)
 
 
 def save_dataframe(df: pd.DataFrame, path: str | os.PathLike[str]) -> None:
@@ -121,6 +128,122 @@ def plot_clinic_distribution(
     plt.title(title)
     plt.legend()
     plt.grid(axis="y", alpha=0.25)
+    plt.tight_layout()
+    plt.savefig(path)
+    plt.close()
+
+
+def plot_metric_series(
+    x_values: Iterable[float],
+    series: Dict[str, Iterable[float]],
+    title: str,
+    xlabel: str,
+    ylabel: str,
+    path: str | os.PathLike[str],
+) -> None:
+    ensure_dir(Path(path).parent)
+    plt.figure(figsize=(9, 5))
+    x_list = list(x_values)
+    for label, values in series.items():
+        plt.plot(x_list, list(values), marker=None, linewidth=2, label=label)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.grid(alpha=0.3)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(path)
+    plt.close()
+
+
+def plot_curve_comparison(
+    curves: List[Dict[str, Iterable[float]]],
+    title: str,
+    xlabel: str,
+    ylabel: str,
+    path: str | os.PathLike[str],
+    diagonal: bool = False,
+) -> None:
+    ensure_dir(Path(path).parent)
+    plt.figure(figsize=(7, 6))
+    for curve in curves:
+        x_values = list(curve.get("x", []))
+        y_values = list(curve.get("y", []))
+        label = str(curve.get("label", "curve"))
+        plt.plot(x_values, y_values, linewidth=2, label=label)
+    if diagonal:
+        plt.plot([0, 1], [0, 1], linestyle="--", color="gray", linewidth=1)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.grid(alpha=0.3)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(path)
+    plt.close()
+
+
+def plot_confusion_matrix(
+    matrix: Iterable[Iterable[float]],
+    labels: Iterable[str],
+    title: str,
+    path: str | os.PathLike[str],
+) -> None:
+    ensure_dir(Path(path).parent)
+    values = np.asarray(list(list(row) for row in matrix), dtype=np.float64)
+    label_list = [str(label) for label in labels]
+
+    plt.figure(figsize=(5.5, 4.5))
+    plt.imshow(values, cmap="Blues")
+    plt.title(title)
+    plt.xticks(range(len(label_list)), label_list)
+    plt.yticks(range(len(label_list)), label_list)
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+
+    for i in range(values.shape[0]):
+        for j in range(values.shape[1]):
+            plt.text(j, i, f"{int(values[i, j])}", ha="center", va="center", color="black")
+
+    plt.colorbar(fraction=0.046, pad=0.04)
+    plt.tight_layout()
+    plt.savefig(path)
+    plt.close()
+
+
+def plot_reliability_diagram(
+    calibration_bins: Iterable[Dict[str, Any]],
+    title: str,
+    path: str | os.PathLike[str],
+) -> None:
+    ensure_dir(Path(path).parent)
+    rows = list(calibration_bins)
+    if not rows:
+        return
+
+    centers = [float(row.get("bin_center", 0.0)) for row in rows if not np.isnan(float(row.get("count", 0.0)))]
+    accuracies = [
+        float(row.get("accuracy", np.nan))
+        for row in rows
+        if not np.isnan(float(row.get("count", 0.0)))
+    ]
+    confidences = [
+        float(row.get("confidence", np.nan))
+        for row in rows
+        if not np.isnan(float(row.get("count", 0.0)))
+    ]
+
+    plt.figure(figsize=(7, 5))
+    plt.plot([0, 1], [0, 1], linestyle="--", color="gray", label="Perfect calibration")
+    plt.plot(confidences, accuracies, marker="o", linewidth=2, label="Model")
+    plt.bar(centers, accuracies, width=0.05, alpha=0.25, color="#4C78A8")
+    plt.title(title)
+    plt.xlabel("Predicted probability")
+    plt.ylabel("Empirical positive rate")
+    plt.xlim(0, 1)
+    plt.ylim(0, 1)
+    plt.grid(alpha=0.3)
+    plt.legend()
     plt.tight_layout()
     plt.savefig(path)
     plt.close()

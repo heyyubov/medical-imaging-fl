@@ -1,0 +1,1075 @@
+{
+  "split": "test",
+  "selected_threshold": 0.6,
+  "selected_threshold_strategy": "target_specificity",
+  "selected_threshold_metric": "balanced_accuracy",
+  "selected_calibration_method": "isotonic",
+  "selected_calibration": {
+    "method": "isotonic",
+    "calibrator": {
+      "method": "isotonic",
+      "x_thresholds": [
+        0.43259796500205994,
+        0.5051605105400085,
+        0.5156782269477844,
+        0.7344691753387451,
+        0.7536936402320862,
+        0.794258177280426
+      ],
+      "y_thresholds": [
+        0.5,
+        0.5,
+        0.5833333333333334,
+        0.5833333333333334,
+        1.0,
+        1.0
+      ]
+    },
+    "metrics": {
+      "auc": 0.6166666666666667,
+      "pr_auc": 0.7124999999999999,
+      "accuracy": 0.625,
+      "balanced_accuracy": 0.49999999999995,
+      "precision": 0.625,
+      "recall": 1.0,
+      "sensitivity": 0.9999999999999,
+      "specificity": 0.0,
+      "f1": 0.7692307692307693,
+      "brier_score": 0.21354166666666669,
+      "ece": 1.249972347849848e-13,
+      "log_loss": 0.5960383470637625,
+      "false_positive_rate": 0.9999999999998334,
+      "false_negative_rate": 0.0,
+      "expected_cost": 0.375,
+      "total_cost": 6.0,
+      "prevalence": 0.625,
+      "tp": 10.0,
+      "tn": 0.0,
+      "fp": 6.0,
+      "fn": 0.0,
+      "threshold": 0.5
+    },
+    "reliability_diagram": {
+      "ece": 1.249972347849848e-13,
+      "mce": 9.999778782798785e-13,
+      "bins": [
+        {
+          "bin_id": 0,
+          "bin_start": 0.0,
+          "bin_end": 0.1,
+          "bin_center": 0.05,
+          "count": 0.0,
+          "accuracy": NaN,
+          "confidence": NaN,
+          "gap": NaN
+        },
+        {
+          "bin_id": 1,
+          "bin_start": 0.1,
+          "bin_end": 0.2,
+          "bin_center": 0.15000000000000002,
+          "count": 0.0,
+          "accuracy": NaN,
+          "confidence": NaN,
+          "gap": NaN
+        },
+        {
+          "bin_id": 2,
+          "bin_start": 0.2,
+          "bin_end": 0.30000000000000004,
+          "bin_center": 0.25,
+          "count": 0.0,
+          "accuracy": NaN,
+          "confidence": NaN,
+          "gap": NaN
+        },
+        {
+          "bin_id": 3,
+          "bin_start": 0.30000000000000004,
+          "bin_end": 0.4,
+          "bin_center": 0.35000000000000003,
+          "count": 0.0,
+          "accuracy": NaN,
+          "confidence": NaN,
+          "gap": NaN
+        },
+        {
+          "bin_id": 4,
+          "bin_start": 0.4,
+          "bin_end": 0.5,
+          "bin_center": 0.45,
+          "count": 0.0,
+          "accuracy": NaN,
+          "confidence": NaN,
+          "gap": NaN
+        },
+        {
+          "bin_id": 5.0,
+          "bin_start": 0.5,
+          "bin_end": 0.6000000000000001,
+          "bin_center": 0.55,
+          "count": 14.0,
+          "accuracy": 0.5714285714285714,
+          "confidence": 0.5714285714285714,
+          "gap": 0.0
+        },
+        {
+          "bin_id": 6,
+          "bin_start": 0.6000000000000001,
+          "bin_end": 0.7000000000000001,
+          "bin_center": 0.6500000000000001,
+          "count": 0.0,
+          "accuracy": NaN,
+          "confidence": NaN,
+          "gap": NaN
+        },
+        {
+          "bin_id": 7,
+          "bin_start": 0.7000000000000001,
+          "bin_end": 0.8,
+          "bin_center": 0.75,
+          "count": 0.0,
+          "accuracy": NaN,
+          "confidence": NaN,
+          "gap": NaN
+        },
+        {
+          "bin_id": 8,
+          "bin_start": 0.8,
+          "bin_end": 0.9,
+          "bin_center": 0.8500000000000001,
+          "count": 0.0,
+          "accuracy": NaN,
+          "confidence": NaN,
+          "gap": NaN
+        },
+        {
+          "bin_id": 9.0,
+          "bin_start": 0.9,
+          "bin_end": 1.0,
+          "bin_center": 0.95,
+          "count": 2.0,
+          "accuracy": 1.0,
+          "confidence": 0.999999999999,
+          "gap": 9.999778782798785e-13
+        }
+      ]
+    }
+  },
+  "calibration_selection_metric": "ece",
+  "target_specificity": 0.3,
+  "target_recall": null,
+  "cost_config": {
+    "fp_cost": 1.0,
+    "fn_cost": 5.0
+  },
+  "reports": {
+    "raw_threshold_0_5": {
+      "metrics": {
+        "auc": 0.5666666666666667,
+        "pr_auc": 0.4233516483516484,
+        "accuracy": 0.625,
+        "balanced_accuracy": 0.6666666666665723,
+        "precision": 0.5,
+        "recall": 0.8333333333333334,
+        "sensitivity": 0.8333333333331945,
+        "specificity": 0.49999999999995,
+        "f1": 0.625,
+        "brier_score": 0.2668889157148977,
+        "ece": 0.2576797902584076,
+        "log_loss": 0.7386553601921257,
+        "false_positive_rate": 0.49999999999995,
+        "false_negative_rate": 0.16666666666663887,
+        "expected_cost": 0.625,
+        "total_cost": 10.0,
+        "prevalence": 0.375,
+        "tp": 5.0,
+        "tn": 5.0,
+        "fp": 5.0,
+        "fn": 1.0,
+        "threshold": 0.5
+      },
+      "confusion_matrix": {
+        "labels": [
+          "normal",
+          "pneumonia"
+        ],
+        "matrix": [
+          [
+            5,
+            5
+          ],
+          [
+            1,
+            5
+          ]
+        ]
+      },
+      "reliability_diagram": {
+        "ece": 0.2576797902584076,
+        "mce": 0.7610327005386353,
+        "bins": [
+          {
+            "bin_id": 0,
+            "bin_start": 0.0,
+            "bin_end": 0.1,
+            "bin_center": 0.05,
+            "count": 0.0,
+            "accuracy": NaN,
+            "confidence": NaN,
+            "gap": NaN
+          },
+          {
+            "bin_id": 1,
+            "bin_start": 0.1,
+            "bin_end": 0.2,
+            "bin_center": 0.15000000000000002,
+            "count": 0.0,
+            "accuracy": NaN,
+            "confidence": NaN,
+            "gap": NaN
+          },
+          {
+            "bin_id": 2.0,
+            "bin_start": 0.2,
+            "bin_end": 0.30000000000000004,
+            "bin_center": 0.25,
+            "count": 1.0,
+            "accuracy": 0.0,
+            "confidence": 0.28285929560661316,
+            "gap": 0.28285929560661316
+          },
+          {
+            "bin_id": 3.0,
+            "bin_start": 0.30000000000000004,
+            "bin_end": 0.4,
+            "bin_center": 0.35000000000000003,
+            "count": 3.0,
+            "accuracy": 0.3333333333333333,
+            "confidence": 0.3367871940135956,
+            "gap": 0.0034538606802622662
+          },
+          {
+            "bin_id": 4.0,
+            "bin_start": 0.4,
+            "bin_end": 0.5,
+            "bin_center": 0.45,
+            "count": 2.0,
+            "accuracy": 0.0,
+            "confidence": 0.42551279067993164,
+            "gap": 0.42551279067993164
+          },
+          {
+            "bin_id": 5.0,
+            "bin_start": 0.5,
+            "bin_end": 0.6000000000000001,
+            "bin_center": 0.55,
+            "count": 3.0,
+            "accuracy": 0.6666666666666666,
+            "confidence": 0.556151807308197,
+            "gap": 0.11051485935846961
+          },
+          {
+            "bin_id": 6.0,
+            "bin_start": 0.6000000000000001,
+            "bin_end": 0.7000000000000001,
+            "bin_center": 0.6500000000000001,
+            "count": 4.0,
+            "accuracy": 0.75,
+            "confidence": 0.6590031236410141,
+            "gap": 0.0909968763589859
+          },
+          {
+            "bin_id": 7.0,
+            "bin_start": 0.7000000000000001,
+            "bin_end": 0.8,
+            "bin_center": 0.75,
+            "count": 3.0,
+            "accuracy": 0.0,
+            "confidence": 0.7610327005386353,
+            "gap": 0.7610327005386353
+          },
+          {
+            "bin_id": 8,
+            "bin_start": 0.8,
+            "bin_end": 0.9,
+            "bin_center": 0.8500000000000001,
+            "count": 0.0,
+            "accuracy": NaN,
+            "confidence": NaN,
+            "gap": NaN
+          },
+          {
+            "bin_id": 9,
+            "bin_start": 0.9,
+            "bin_end": 1.0,
+            "bin_center": 0.95,
+            "count": 0.0,
+            "accuracy": NaN,
+            "confidence": NaN,
+            "gap": NaN
+          }
+        ]
+      },
+      "roc_curve": {
+        "fpr": [
+          0.0,
+          0.1,
+          0.3,
+          0.3,
+          0.4,
+          0.4,
+          0.5,
+          0.5,
+          0.7,
+          0.7,
+          1.0
+        ],
+        "tpr": [
+          0.0,
+          0.0,
+          0.0,
+          0.3333333333333333,
+          0.3333333333333333,
+          0.6666666666666666,
+          0.6666666666666666,
+          0.8333333333333334,
+          0.8333333333333334,
+          1.0,
+          1.0
+        ],
+        "thresholds": [
+          1.0,
+          0.7851570844650269,
+          0.7409011721611023,
+          0.6780280470848083,
+          0.6336084008216858,
+          0.5942055583000183,
+          0.563175618648529,
+          0.5110742449760437,
+          0.40915486216545105,
+          0.3539939224720001,
+          0.28285929560661316
+        ]
+      },
+      "pr_curve": {
+        "recall": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.8333333333333334,
+          0.8333333333333334,
+          0.8333333333333334,
+          0.6666666666666666,
+          0.6666666666666666,
+          0.5,
+          0.3333333333333333,
+          0.3333333333333333,
+          0.16666666666666666,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "precision": [
+          0.375,
+          0.4,
+          0.42857142857142855,
+          0.46153846153846156,
+          0.4166666666666667,
+          0.45454545454545453,
+          0.5,
+          0.4444444444444444,
+          0.5,
+          0.42857142857142855,
+          0.3333333333333333,
+          0.4,
+          0.25,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thresholds": [
+          0.28285929560661316,
+          0.3147456645965576,
+          0.341621994972229,
+          0.3539939224720001,
+          0.40915486216545105,
+          0.44187071919441223,
+          0.5110742449760437,
+          0.563175618648529,
+          0.5942055583000183,
+          0.6330132484436035,
+          0.6336084008216858,
+          0.6780280470848083,
+          0.6913627982139587,
+          0.7409011721611023,
+          0.7570398449897766,
+          0.7851570844650269
+        ]
+      }
+    },
+    "selected_calibration_threshold_0_5": {
+      "metrics": {
+        "auc": 0.525,
+        "pr_auc": 0.44212962962962965,
+        "accuracy": 0.375,
+        "balanced_accuracy": 0.4999999999999167,
+        "precision": 0.375,
+        "recall": 1.0,
+        "sensitivity": 0.9999999999998334,
+        "specificity": 0.0,
+        "f1": 0.5454545454545454,
+        "brier_score": 0.35016823078688974,
+        "ece": 0.23559964422234886,
+        "log_loss": 4.075891241087946,
+        "false_positive_rate": 0.9999999999999,
+        "false_negative_rate": 0.0,
+        "expected_cost": 0.625,
+        "total_cost": 10.0,
+        "prevalence": 0.375,
+        "tp": 6.0,
+        "tn": 0.0,
+        "fp": 10.0,
+        "fn": 0.0,
+        "threshold": 0.5
+      },
+      "confusion_matrix": {
+        "labels": [
+          "normal",
+          "pneumonia"
+        ],
+        "matrix": [
+          [
+            0,
+            10
+          ],
+          [
+            0,
+            6
+          ]
+        ]
+      },
+      "reliability_diagram": {
+        "ece": 0.23559964422234886,
+        "mce": 0.999999999999,
+        "bins": [
+          {
+            "bin_id": 0,
+            "bin_start": 0.0,
+            "bin_end": 0.1,
+            "bin_center": 0.05,
+            "count": 0.0,
+            "accuracy": NaN,
+            "confidence": NaN,
+            "gap": NaN
+          },
+          {
+            "bin_id": 1,
+            "bin_start": 0.1,
+            "bin_end": 0.2,
+            "bin_center": 0.15000000000000002,
+            "count": 0.0,
+            "accuracy": NaN,
+            "confidence": NaN,
+            "gap": NaN
+          },
+          {
+            "bin_id": 2,
+            "bin_start": 0.2,
+            "bin_end": 0.30000000000000004,
+            "bin_center": 0.25,
+            "count": 0.0,
+            "accuracy": NaN,
+            "confidence": NaN,
+            "gap": NaN
+          },
+          {
+            "bin_id": 3,
+            "bin_start": 0.30000000000000004,
+            "bin_end": 0.4,
+            "bin_center": 0.35000000000000003,
+            "count": 0.0,
+            "accuracy": NaN,
+            "confidence": NaN,
+            "gap": NaN
+          },
+          {
+            "bin_id": 4,
+            "bin_start": 0.4,
+            "bin_end": 0.5,
+            "bin_center": 0.45,
+            "count": 0.0,
+            "accuracy": NaN,
+            "confidence": NaN,
+            "gap": NaN
+          },
+          {
+            "bin_id": 5.0,
+            "bin_start": 0.5,
+            "bin_end": 0.6000000000000001,
+            "bin_center": 0.55,
+            "count": 13.0,
+            "accuracy": 0.46153846153846156,
+            "confidence": 0.5420657955652118,
+            "gap": 0.08052733402675027
+          },
+          {
+            "bin_id": 6,
+            "bin_start": 0.6000000000000001,
+            "bin_end": 0.7000000000000001,
+            "bin_center": 0.6500000000000001,
+            "count": 0.0,
+            "accuracy": NaN,
+            "confidence": NaN,
+            "gap": NaN
+          },
+          {
+            "bin_id": 7.0,
+            "bin_start": 0.7000000000000001,
+            "bin_end": 0.8,
+            "bin_center": 0.75,
+            "count": 1.0,
+            "accuracy": 0.0,
+            "confidence": 0.7227389652118285,
+            "gap": 0.7227389652118285
+          },
+          {
+            "bin_id": 8,
+            "bin_start": 0.8,
+            "bin_end": 0.9,
+            "bin_center": 0.8500000000000001,
+            "count": 0.0,
+            "accuracy": NaN,
+            "confidence": NaN,
+            "gap": NaN
+          },
+          {
+            "bin_id": 9.0,
+            "bin_start": 0.9,
+            "bin_end": 1.0,
+            "bin_center": 0.95,
+            "count": 2.0,
+            "accuracy": 0.0,
+            "confidence": 0.999999999999,
+            "gap": 0.999999999999
+          }
+        ]
+      },
+      "roc_curve": {
+        "fpr": [
+          0.0,
+          0.2,
+          0.3,
+          0.5,
+          0.5,
+          1.0
+        ],
+        "tpr": [
+          0.0,
+          0.0,
+          0.0,
+          0.6666666666666666,
+          0.8333333333333334,
+          1.0
+        ],
+        "thresholds": [
+          1.0,
+          0.999999999999,
+          0.7227389652118285,
+          0.5833333333333334,
+          0.5468553423477541,
+          0.5
+        ]
+      },
+      "pr_curve": {
+        "recall": [
+          1.0,
+          0.8333333333333334,
+          0.6666666666666666,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "precision": [
+          0.375,
+          0.5,
+          0.4444444444444444,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thresholds": [
+          0.5,
+          0.5468553423477541,
+          0.5833333333333334,
+          0.7227389652118285,
+          0.999999999999
+        ]
+      }
+    },
+    "selected": {
+      "metrics": {
+        "auc": 0.525,
+        "pr_auc": 0.44212962962962965,
+        "accuracy": 0.4375,
+        "balanced_accuracy": 0.349999999999965,
+        "precision": 0.0,
+        "recall": 0.0,
+        "sensitivity": 0.0,
+        "specificity": 0.69999999999993,
+        "f1": 0.0,
+        "brier_score": 0.35016823078688974,
+        "ece": 0.23559964422234886,
+        "log_loss": 4.075891241087946,
+        "false_positive_rate": 0.29999999999997,
+        "false_negative_rate": 0.9999999999998334,
+        "expected_cost": 2.0625,
+        "total_cost": 33.0,
+        "prevalence": 0.375,
+        "tp": 0.0,
+        "tn": 7.0,
+        "fp": 3.0,
+        "fn": 6.0,
+        "threshold": 0.6
+      },
+      "confusion_matrix": {
+        "labels": [
+          "normal",
+          "pneumonia"
+        ],
+        "matrix": [
+          [
+            7,
+            3
+          ],
+          [
+            6,
+            0
+          ]
+        ]
+      },
+      "reliability_diagram": {
+        "ece": 0.23559964422234886,
+        "mce": 0.999999999999,
+        "bins": [
+          {
+            "bin_id": 0,
+            "bin_start": 0.0,
+            "bin_end": 0.1,
+            "bin_center": 0.05,
+            "count": 0.0,
+            "accuracy": NaN,
+            "confidence": NaN,
+            "gap": NaN
+          },
+          {
+            "bin_id": 1,
+            "bin_start": 0.1,
+            "bin_end": 0.2,
+            "bin_center": 0.15000000000000002,
+            "count": 0.0,
+            "accuracy": NaN,
+            "confidence": NaN,
+            "gap": NaN
+          },
+          {
+            "bin_id": 2,
+            "bin_start": 0.2,
+            "bin_end": 0.30000000000000004,
+            "bin_center": 0.25,
+            "count": 0.0,
+            "accuracy": NaN,
+            "confidence": NaN,
+            "gap": NaN
+          },
+          {
+            "bin_id": 3,
+            "bin_start": 0.30000000000000004,
+            "bin_end": 0.4,
+            "bin_center": 0.35000000000000003,
+            "count": 0.0,
+            "accuracy": NaN,
+            "confidence": NaN,
+            "gap": NaN
+          },
+          {
+            "bin_id": 4,
+            "bin_start": 0.4,
+            "bin_end": 0.5,
+            "bin_center": 0.45,
+            "count": 0.0,
+            "accuracy": NaN,
+            "confidence": NaN,
+            "gap": NaN
+          },
+          {
+            "bin_id": 5.0,
+            "bin_start": 0.5,
+            "bin_end": 0.6000000000000001,
+            "bin_center": 0.55,
+            "count": 13.0,
+            "accuracy": 0.46153846153846156,
+            "confidence": 0.5420657955652118,
+            "gap": 0.08052733402675027
+          },
+          {
+            "bin_id": 6,
+            "bin_start": 0.6000000000000001,
+            "bin_end": 0.7000000000000001,
+            "bin_center": 0.6500000000000001,
+            "count": 0.0,
+            "accuracy": NaN,
+            "confidence": NaN,
+            "gap": NaN
+          },
+          {
+            "bin_id": 7.0,
+            "bin_start": 0.7000000000000001,
+            "bin_end": 0.8,
+            "bin_center": 0.75,
+            "count": 1.0,
+            "accuracy": 0.0,
+            "confidence": 0.7227389652118285,
+            "gap": 0.7227389652118285
+          },
+          {
+            "bin_id": 8,
+            "bin_start": 0.8,
+            "bin_end": 0.9,
+            "bin_center": 0.8500000000000001,
+            "count": 0.0,
+            "accuracy": NaN,
+            "confidence": NaN,
+            "gap": NaN
+          },
+          {
+            "bin_id": 9.0,
+            "bin_start": 0.9,
+            "bin_end": 1.0,
+            "bin_center": 0.95,
+            "count": 2.0,
+            "accuracy": 0.0,
+            "confidence": 0.999999999999,
+            "gap": 0.999999999999
+          }
+        ]
+      },
+      "roc_curve": {
+        "fpr": [
+          0.0,
+          0.2,
+          0.3,
+          0.5,
+          0.5,
+          1.0
+        ],
+        "tpr": [
+          0.0,
+          0.0,
+          0.0,
+          0.6666666666666666,
+          0.8333333333333334,
+          1.0
+        ],
+        "thresholds": [
+          1.0,
+          0.999999999999,
+          0.7227389652118285,
+          0.5833333333333334,
+          0.5468553423477541,
+          0.5
+        ]
+      },
+      "pr_curve": {
+        "recall": [
+          1.0,
+          0.8333333333333334,
+          0.6666666666666666,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "precision": [
+          0.375,
+          0.5,
+          0.4444444444444444,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "thresholds": [
+          0.5,
+          0.5468553423477541,
+          0.5833333333333334,
+          0.7227389652118285,
+          0.999999999999
+        ]
+      }
+    }
+  },
+  "raw_threshold_summary": {
+    "best_balanced_accuracy": {
+      "auc": 0.5666666666666667,
+      "pr_auc": 0.4233516483516484,
+      "accuracy": 0.625,
+      "balanced_accuracy": 0.6666666666665723,
+      "precision": 0.5,
+      "recall": 0.8333333333333334,
+      "sensitivity": 0.8333333333331945,
+      "specificity": 0.49999999999995,
+      "f1": 0.625,
+      "brier_score": 0.2668889157148977,
+      "ece": 0.2576797902584076,
+      "log_loss": 0.7386553601921257,
+      "false_positive_rate": 0.49999999999995,
+      "false_negative_rate": 0.16666666666663887,
+      "expected_cost": 0.625,
+      "total_cost": 10.0,
+      "prevalence": 0.375,
+      "tp": 5.0,
+      "tn": 5.0,
+      "fp": 5.0,
+      "fn": 1.0,
+      "threshold": 0.45,
+      "youden_j": 0.3333333333331445
+    },
+    "best_f1": {
+      "auc": 0.5666666666666667,
+      "pr_auc": 0.4233516483516484,
+      "accuracy": 0.5625,
+      "balanced_accuracy": 0.6499999999999017,
+      "precision": 0.46153846153846156,
+      "recall": 1.0,
+      "sensitivity": 0.9999999999998334,
+      "specificity": 0.29999999999997,
+      "f1": 0.631578947368421,
+      "brier_score": 0.2668889157148977,
+      "ece": 0.2576797902584076,
+      "log_loss": 0.7386553601921257,
+      "false_positive_rate": 0.69999999999993,
+      "false_negative_rate": 0.0,
+      "expected_cost": 0.4375,
+      "total_cost": 7.0,
+      "prevalence": 0.375,
+      "tp": 6.0,
+      "tn": 3.0,
+      "fp": 7.0,
+      "fn": 0.0,
+      "threshold": 0.35,
+      "youden_j": 0.2999999999998033
+    },
+    "best_youden_j": {
+      "auc": 0.5666666666666667,
+      "pr_auc": 0.4233516483516484,
+      "accuracy": 0.625,
+      "balanced_accuracy": 0.6666666666665723,
+      "precision": 0.5,
+      "recall": 0.8333333333333334,
+      "sensitivity": 0.8333333333331945,
+      "specificity": 0.49999999999995,
+      "f1": 0.625,
+      "brier_score": 0.2668889157148977,
+      "ece": 0.2576797902584076,
+      "log_loss": 0.7386553601921257,
+      "false_positive_rate": 0.49999999999995,
+      "false_negative_rate": 0.16666666666663887,
+      "expected_cost": 0.625,
+      "total_cost": 10.0,
+      "prevalence": 0.375,
+      "tp": 5.0,
+      "tn": 5.0,
+      "fp": 5.0,
+      "fn": 1.0,
+      "threshold": 0.45,
+      "youden_j": 0.3333333333331445
+    },
+    "best_expected_cost": {
+      "auc": 0.5666666666666667,
+      "pr_auc": 0.4233516483516484,
+      "accuracy": 0.5625,
+      "balanced_accuracy": 0.6499999999999017,
+      "precision": 0.46153846153846156,
+      "recall": 1.0,
+      "sensitivity": 0.9999999999998334,
+      "specificity": 0.29999999999997,
+      "f1": 0.631578947368421,
+      "brier_score": 0.2668889157148977,
+      "ece": 0.2576797902584076,
+      "log_loss": 0.7386553601921257,
+      "false_positive_rate": 0.69999999999993,
+      "false_negative_rate": 0.0,
+      "expected_cost": 0.4375,
+      "total_cost": 7.0,
+      "prevalence": 0.375,
+      "tp": 6.0,
+      "tn": 3.0,
+      "fp": 7.0,
+      "fn": 0.0,
+      "threshold": 0.35,
+      "youden_j": 0.2999999999998033
+    },
+    "target_specificity": {
+      "auc": 0.5666666666666667,
+      "pr_auc": 0.4233516483516484,
+      "accuracy": 0.625,
+      "balanced_accuracy": 0.6666666666665723,
+      "precision": 0.5,
+      "recall": 0.8333333333333334,
+      "sensitivity": 0.8333333333331945,
+      "specificity": 0.49999999999995,
+      "f1": 0.625,
+      "brier_score": 0.2668889157148977,
+      "ece": 0.2576797902584076,
+      "log_loss": 0.7386553601921257,
+      "false_positive_rate": 0.49999999999995,
+      "false_negative_rate": 0.16666666666663887,
+      "expected_cost": 0.625,
+      "total_cost": 10.0,
+      "prevalence": 0.375,
+      "tp": 5.0,
+      "tn": 5.0,
+      "fp": 5.0,
+      "fn": 1.0,
+      "threshold": 0.45,
+      "youden_j": 0.3333333333331445
+    },
+    "target_recall": null
+  },
+  "selected_threshold_summary": {
+    "best_balanced_accuracy": {
+      "auc": 0.525,
+      "pr_auc": 0.44212962962962965,
+      "accuracy": 0.5625,
+      "balanced_accuracy": 0.5833333333332528,
+      "precision": 0.4444444444444444,
+      "recall": 0.6666666666666666,
+      "sensitivity": 0.6666666666665555,
+      "specificity": 0.49999999999995,
+      "f1": 0.5333333333333333,
+      "brier_score": 0.35016823078688974,
+      "ece": 0.23559964422234886,
+      "log_loss": 4.075891241087946,
+      "false_positive_rate": 0.49999999999995,
+      "false_negative_rate": 0.33333333333327775,
+      "expected_cost": 0.9375,
+      "total_cost": 15.0,
+      "prevalence": 0.375,
+      "tp": 4.0,
+      "tn": 5.0,
+      "fp": 5.0,
+      "fn": 2.0,
+      "threshold": 0.55,
+      "youden_j": 0.16666666666650554
+    },
+    "best_f1": {
+      "auc": 0.525,
+      "pr_auc": 0.44212962962962965,
+      "accuracy": 0.375,
+      "balanced_accuracy": 0.4999999999999167,
+      "precision": 0.375,
+      "recall": 1.0,
+      "sensitivity": 0.9999999999998334,
+      "specificity": 0.0,
+      "f1": 0.5454545454545454,
+      "brier_score": 0.35016823078688974,
+      "ece": 0.23559964422234886,
+      "log_loss": 4.075891241087946,
+      "false_positive_rate": 0.9999999999999,
+      "false_negative_rate": 0.0,
+      "expected_cost": 0.625,
+      "total_cost": 10.0,
+      "prevalence": 0.375,
+      "tp": 6.0,
+      "tn": 0.0,
+      "fp": 10.0,
+      "fn": 0.0,
+      "threshold": 0.0,
+      "youden_j": -1.66644475996236e-13
+    },
+    "best_youden_j": {
+      "auc": 0.525,
+      "pr_auc": 0.44212962962962965,
+      "accuracy": 0.5625,
+      "balanced_accuracy": 0.5833333333332528,
+      "precision": 0.4444444444444444,
+      "recall": 0.6666666666666666,
+      "sensitivity": 0.6666666666665555,
+      "specificity": 0.49999999999995,
+      "f1": 0.5333333333333333,
+      "brier_score": 0.35016823078688974,
+      "ece": 0.23559964422234886,
+      "log_loss": 4.075891241087946,
+      "false_positive_rate": 0.49999999999995,
+      "false_negative_rate": 0.33333333333327775,
+      "expected_cost": 0.9375,
+      "total_cost": 15.0,
+      "prevalence": 0.375,
+      "tp": 4.0,
+      "tn": 5.0,
+      "fp": 5.0,
+      "fn": 2.0,
+      "threshold": 0.55,
+      "youden_j": 0.16666666666650554
+    },
+    "best_expected_cost": {
+      "auc": 0.525,
+      "pr_auc": 0.44212962962962965,
+      "accuracy": 0.375,
+      "balanced_accuracy": 0.4999999999999167,
+      "precision": 0.375,
+      "recall": 1.0,
+      "sensitivity": 0.9999999999998334,
+      "specificity": 0.0,
+      "f1": 0.5454545454545454,
+      "brier_score": 0.35016823078688974,
+      "ece": 0.23559964422234886,
+      "log_loss": 4.075891241087946,
+      "false_positive_rate": 0.9999999999999,
+      "false_negative_rate": 0.0,
+      "expected_cost": 0.625,
+      "total_cost": 10.0,
+      "prevalence": 0.375,
+      "tp": 6.0,
+      "tn": 0.0,
+      "fp": 10.0,
+      "fn": 0.0,
+      "threshold": 0.0,
+      "youden_j": -1.66644475996236e-13
+    },
+    "target_specificity": {
+      "auc": 0.525,
+      "pr_auc": 0.44212962962962965,
+      "accuracy": 0.5625,
+      "balanced_accuracy": 0.5833333333332528,
+      "precision": 0.4444444444444444,
+      "recall": 0.6666666666666666,
+      "sensitivity": 0.6666666666665555,
+      "specificity": 0.49999999999995,
+      "f1": 0.5333333333333333,
+      "brier_score": 0.35016823078688974,
+      "ece": 0.23559964422234886,
+      "log_loss": 4.075891241087946,
+      "false_positive_rate": 0.49999999999995,
+      "false_negative_rate": 0.33333333333327775,
+      "expected_cost": 0.9375,
+      "total_cost": 15.0,
+      "prevalence": 0.375,
+      "tp": 4.0,
+      "tn": 5.0,
+      "fp": 5.0,
+      "fn": 2.0,
+      "threshold": 0.55,
+      "youden_j": 0.16666666666650554
+    },
+    "target_recall": null
+  },
+  "artifacts": {
+    "predictions_csv": "results/metrics/centralized_baseline_smoke_test_predictions.csv",
+    "calibration_csv": "results/metrics/centralized_baseline_smoke_test_calibration_comparison.csv",
+    "raw_threshold_sweep_csv": "results/metrics/centralized_baseline_smoke_test_threshold_sweep_raw.csv",
+    "selected_threshold_sweep_csv": "results/metrics/centralized_baseline_smoke_test_threshold_sweep_selected.csv"
+  }
+}
